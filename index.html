@@ -3,87 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Kuliner & Jajanan UMKM</title>
-    <!-- Link File CSS Eksternal -->
-    <link rel="stylesheet" href="style.css">
-    <!-- FontAwesome & Google Fonts -->
+    <title>Katalog Kuliner & Jajanan Desa Pegandon</title>
+    <!-- Memuat ikon Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Memuat font Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Menghubungkan stylesheet terpisah -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Top Announcement -->
+    <!-- Top Announcement Bar -->
     <div class="top-bar">
         <div class="container top-bar-content">
-            <p><i class="fa-solid fa-utensils"></i> Promo Hari Ini: <strong>Diskon 20%</strong> Jajanan Nusantara!</p>
+            <p><i class="fa-solid fa-utensils"></i> Promo Khas Desa Pegandon: <strong>Diskon 20%</strong> Jajanan Tradisional!</p>
             <div class="top-bar-links">
-                <a href="https://wa.me/6285725752267?text=Halo,%20saya%20ingin%20bertanya%20tentang%20promo%20jajanan" target="_blank"><i class="fa-brands fa-whatsapp"></i> Chat Admin</a>
+                <a href="https://wa.me/6287856866682?text=Halo,%20saya%20ingin%20bertanya%20tentang%20kuliner%20Pegandon" target="_blank" rel="noopener noreferrer">
+                    <i class="fa-brands fa-whatsapp"></i> Chat Admin
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Header Navbar -->
+    <!-- Header & Navigation Bar -->
     <header class="navbar-section">
         <div class="container navbar">
             <a href="#" class="logo">
                 <div class="logo-icon"><i class="fa-solid fa-bowl-food"></i></div>
-                <div class="logo-text">Kuliner<span>Nusantara</span></div>
+                <div class="logo-text">Kuliner<span>Pegandon</span></div>
             </a>
-            
-            <nav class="nav-menu">
+
+            <nav class="nav-menu" aria-label="Navigasi Utama">
                 <ul>
                     <li><a href="#beranda" class="active">Beranda</a></li>
-                    <li><a href="#katalog-tabel">Daftar Menu</a></li>
                     <li><a href="#galeri">Menu Favorit</a></li>
+                    <li><a href="#katalog-tabel">Daftar Menu</a></li>
                     <li><a href="#kontak">Kontak</a></li>
                     <li><a href="#" id="orderHistoryNavBtn"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Pesanan</a></li>
                     <li id="stockLogNavItem" style="display:none;"><a href="#" id="stockLogNavBtn"><i class="fa-solid fa-boxes-stacked"></i> Riwayat Stok</a></li>
-                    <li><a href="#" id="adminLoginNavBtn" class="admin-login-link"><i class="fa-solid fa-user"></i> <span id="adminNavText">Login / Daftar</span></a></li>
+                    <li><a href="#" id="memberLoginNavBtn" class="member-login-link"><i class="fa-solid fa-user"></i> <span id="memberNavText">Login Member</span></a></li>
+                    <li><a href="#" id="adminLoginNavBtn" class="admin-login-link"><i class="fa-solid fa-user-shield"></i> <span id="adminNavText">Login Admin</span></a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <!-- Hero Section -->
+    <!-- Hero Slider Section -->
     <section id="beranda" class="hero">
-        <div class="hero-overlay"></div>
-        <div class="container hero-content">
-            <span class="badge-hero"><i class="fa-solid fa-fire"></i> Cita Rasa Otentik UMKM</span>
-            <h1>Aneka Jajanan & Minuman<br><span>Khas Nusantara</span></h1>
-            <p>Nikmati kelezatan kue basah, jajanan pasar, cemilan renyah, dan minuman segar langsung buatan dapur lokal.</p>
-            <div class="hero-buttons">
-                <a href="#katalog-tabel" class="btn btn-primary"><i class="fa-solid fa-table-list"></i> Lihat Tabel Menu</a>
-                <a href="#galeri" class="btn btn-outline"><i class="fa-solid fa-cookie-bite"></i> Galeri Jajanan</a>
+        <div class="hero-slides" id="heroSlides">
+            <!-- Slide 1 -->
+            <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1400');">
+                <div class="hero-slide-content">
+                    <span class="badge-hero"><i class="fa-solid fa-fire"></i> Cita Rasa Otentik Desa Pegandon</span>
+                    <h1>Aneka Jajanan & Minuman<br><span>Khas Desa Pegandon</span></h1>
+                    <p>Nikmati kelezatan kue basah, jajanan pasar, cemilan renyah, dan minuman segar langsung buatan dapur warga lokal Desa Pegandon.</p>
+                    <div class="hero-buttons">
+                        <a href="#galeri" class="btn btn-primary"><i class="fa-solid fa-cookie-bite"></i> Menu Favorit</a>
+                        <a href="#katalog-tabel" class="btn btn-outline"><i class="fa-solid fa-table-list"></i> Lihat Tabel Menu</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1400');">
+                <div class="hero-slide-content">
+                    <span class="badge-hero"><i class="fa-solid fa-percent"></i> Promo Spesial Desa Pegandon</span>
+                    <h1>Diskon 20% Jajanan Pasar<br><span>Paling Lezat & Segar</span></h1>
+                    <p>Pesan sekarang dan nikmati penawaran khusus untuk semua menu kuliner unggulan warga Desa Pegandon.</p>
+                    <div class="hero-buttons">
+                        <a href="#katalog-tabel" class="btn btn-primary"><i class="fa-solid fa-bag-shopping"></i> Pesan Menu Promo</a>
+                        <a href="https://wa.me/6287856866682" target="_blank" rel="noopener noreferrer" class="btn btn-outline"><i class="fa-brands fa-whatsapp"></i> Chat Admin</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&q=80&w=1400');">
+                <div class="hero-slide-content">
+                    <span class="badge-hero"><i class="fa-solid fa-mug-hot"></i> Minuman Tradisional & Cemilan Pegandon</span>
+                    <h1>Kopi Tubruk & Es Cendol<br><span>Segar Khas Desa Pegandon</span></h1>
+                    <p>Racikan biji kopi rempah pilihan serta cendol gula aren asli buatan tangan warga Desa Pegandon siap menemani santai Anda.</p>
+                    <div class="hero-buttons">
+                        <a href="#katalog-tabel" class="btn btn-primary"><i class="fa-solid fa-glass-water"></i> Cek Stok Menu</a>
+                        <a href="#" id="heroHistoryBtn" class="btn btn-outline"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Pesanan</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clone Slide 1 untuk perpindahan searah yang mulus -->
+            <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1400');">
+                <div class="hero-slide-content">
+                    <span class="badge-hero"><i class="fa-solid fa-fire"></i> Cita Rasa Otentik Desa Pegandon</span>
+                    <h1>Aneka Jajanan & Minuman<br><span>Khas Desa Pegandon</span></h1>
+                    <p>Nikmati kelezatan kue basah, jajanan pasar, cemilan renyah, dan minuman segar langsung buatan dapur warga lokal Desa Pegandon.</p>
+                    <div class="hero-buttons">
+                        <a href="#galeri" class="btn btn-primary"><i class="fa-solid fa-cookie-bite"></i> Menu Favorit</a>
+                        <a href="#katalog-tabel" class="btn btn-outline"><i class="fa-solid fa-table-list"></i> Lihat Tabel Menu</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-dots" id="heroDots">
+            <button type="button" class="hero-dot active" data-slide="0" aria-label="Slide 1"></button>
+            <button type="button" class="hero-dot" data-slide="1" aria-label="Slide 2"></button>
+            <button type="button" class="hero-dot" data-slide="2" aria-label="Slide 3"></button>
+        </div>
+    </section>
+
+    <!-- Section Menu Favorit -->
+    <section id="galeri" class="section">
+        <div class="container">
+            <div class="section-header">
+                <span class="sub-title">Menu Favorit</span>
+                <h2>Rekomendasi Jajanan Terlaris Pegandon</h2>
+                <p>Dekatkan kursor untuk memperbesar & melihat detail, atau geser ke samping menggunakan jari / mouse.</p>
+            </div>
+
+            <div class="fav-scroller-wrapper" id="favScrollerWrapper">
+                <div class="fav-track" id="favTrack">
+                    <!-- Card 1 -->
+                    <div class="product-card" data-detail-id="KLN-001">
+                        <div class="card-badge">Paling Laris</div>
+                        <div class="card-image open-detail" data-id="KLN-001">
+                            <img src="images/risoles.jpg" alt="Risoles Mayo Pegandon" onerror="this.onerror=null;this.src='https://nurse-grin-ql608.hostmora.app/images/risoles.jpg'">
+                            <div class="card-overlay">
+                                <button type="button" class="btn-quick-view">Lihat Detail</button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <span class="card-category">Jajanan Pasar</span>
+                            <h3 class="card-title open-detail" data-id="KLN-001">Risoles Mayo Pegandon</h3>
+                            <p class="card-desc">Kulit renyah buatan rumah dengan isian telur, daging sapi asap, dan mayo gurih.</p>
+                            <div class="card-bottom">
+                                <div class="price-wrap">
+                                    <span class="current-price">Rp 25.000</span>
+                                </div>
+                                <button type="button" class="btn-card-buy add-to-cart-btn" data-id="KLN-001" data-name="Risoles Mayo Pegandon (Isi 5)" data-price="25000" data-img="images/risoles.jpg">
+                                    <i class="fa-solid fa-cart-shopping"></i> Beli
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="product-card" data-detail-id="KLN-002">
+                        <div class="card-image open-detail" data-id="KLN-002">
+                            <img src="images/kopi-tubruk.jpg" alt="Kopi Tubruk Pegandon" onerror="this.onerror=null;this.src='https://nurse-grin-ql608.hostmora.app/images/kopi-tubruk.jpg'">
+                            <div class="card-overlay">
+                                <button type="button" class="btn-quick-view">Lihat Detail</button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <span class="card-category">Minuman</span>
+                            <h3 class="card-title open-detail" data-id="KLN-002">Kopi Tubruk Pegandon</h3>
+                            <p class="card-desc">Racikan biji kopi robusta pilihan dipadu rempah alami khas racikan warga Pegandon.</p>
+                            <div class="card-bottom">
+                                <div class="price-wrap">
+                                    <span class="current-price">Rp 18.000</span>
+                                </div>
+                                <button type="button" class="btn-card-buy add-to-cart-btn" data-id="KLN-002" data-name="Kopi Tubruk Pegandon" data-price="18000" data-img="images/kopi-tubruk.jpg">
+                                    <i class="fa-solid fa-cart-shopping"></i> Beli
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="product-card" data-detail-id="KLN-004">
+                        <div class="card-badge promo">Hemat 10%</div>
+                        <div class="card-image open-detail" data-id="KLN-004">
+                            <img src="images/pempek.jpg" alt="Pempek Pegandon" onerror="this.onerror=null;this.src='https://nurse-grin-ql608.hostmora.app/images/pempek.jpg'">
+                            <div class="card-overlay">
+                                <button type="button" class="btn-quick-view">Lihat Detail</button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <span class="card-category">Makanan Utama</span>
+                            <h3 class="card-title open-detail" data-id="KLN-004">Pempek Pegandon</h3>
+                            <p class="card-desc">Ikan tenggiri asli dengan isian telur utuh dan kuah cuko kental pedas manis.</p>
+                            <div class="card-bottom">
+                                <div class="price-wrap">
+                                    <span class="old-price">Rp 35.000</span>
+                                    <span class="current-price">Rp 31.500</span>
+                                </div>
+                                <button type="button" class="btn-card-buy add-to-cart-btn" data-id="KLN-004" data-name="Pempek Pegandon (Promo)" data-price="31500" data-img="images/pempek.jpg">
+                                    <i class="fa-solid fa-cart-shopping"></i> Beli
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 4 -->
+                    <div class="product-card" data-detail-id="KLN-005">
+                        <div class="card-image open-detail" data-id="KLN-005">
+                            <img src="images/es-cendol.jpg" alt="Es Cendol Pegandon" onerror="this.onerror=null;this.src='https://nurse-grin-ql608.hostmora.app/images/es-cendol.jpg'">
+                            <div class="card-overlay">
+                                <button type="button" class="btn-quick-view">Lihat Detail</button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <span class="card-category">Minuman Segar</span>
+                            <h3 class="card-title open-detail" data-id="KLN-005">Es Cendol Pegandon</h3>
+                            <p class="card-desc">Cendol tepung beras suji asli dipadu toping daging durian murni dan nangka segar Pegandon.</p>
+                            <div class="card-bottom">
+                                <div class="price-wrap">
+                                    <span class="current-price">Rp 20.000</span>
+                                </div>
+                                <button type="button" class="btn-card-buy add-to-cart-btn" data-id="KLN-005" data-name="Es Cendol Pegandon" data-price="20000" data-img="images/es-cendol.jpg">
+                                    <i class="fa-solid fa-cart-shopping"></i> Beli
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 5 -->
+                    <div class="product-card" data-detail-id="KLN-003">
+                        <div class="card-image open-detail" data-id="KLN-003">
+                            <img src="images/keripik-singkong.jpg" alt="Keripik Singkong Pegandon" onerror="this.onerror=null;this.src='https://nurse-grin-ql608.hostmora.app/images/keripik-singkong.jpg'">
+                            <div class="card-overlay">
+                                <button type="button" class="btn-quick-view">Lihat Detail</button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <span class="card-category">Cemilan</span>
+                            <h3 class="card-title open-detail" data-id="KLN-003">Keripik Singkong Pegandon</h3>
+                            <p class="card-desc">Irisan singkong renyah hasil panen lokal Pegandon dengan bumbu balado pilihan.</p>
+                            <div class="card-bottom">
+                                <div class="price-wrap">
+                                    <span class="current-price">Rp 15.000</span>
+                                </div>
+                                <button type="button" class="btn-card-buy add-to-cart-btn" data-id="KLN-003" data-name="Keripik Singkong Pegandon" data-price="15000" data-img="images/keripik-singkong.jpg">
+                                    <i class="fa-solid fa-cart-shopping"></i> Beli
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 6 -->
+                    <div class="product-card" data-detail-id="KLN-006">
+                        <div class="card-image open-detail" data-id="KLN-006">
+                            <img src="images/kue-lumpur.jpg" alt="Kue Lumpur Pegandon" onerror="this.onerror=null;this.src='https://nurse-grin-ql608.hostmora.app/images/kue-lumpur.jpg'">
+                            <div class="card-overlay">
+                                <button type="button" class="btn-quick-view">Lihat Detail</button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <span class="card-category">Jajanan Pasar</span>
+                            <h3 class="card-title open-detail" data-id="KLN-006">Kue Lumpur Pegandon</h3>
+                            <p class="card-desc">Kue basah lembut buatan dapur Desa Pegandon dengan taburan kismis manis.</p>
+                            <div class="card-bottom">
+                                <div class="price-wrap">
+                                    <span class="current-price">Rp 22.000</span>
+                                </div>
+                                <button type="button" class="btn-card-buy add-to-cart-btn" data-id="KLN-006" data-name="Kue Lumpur Pegandon (Isi 4)" data-price="22000" data-img="images/kue-lumpur.jpg">
+                                    <i class="fa-solid fa-cart-shopping"></i> Beli
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Section Tabel Katalog -->
+    <!-- Section Tabel Katalog (Daftar Stok & Harga) -->
     <section id="katalog-tabel" class="section bg-light">
         <div class="container">
             <div class="section-header">
                 <span class="sub-title">Daftar Stok & Harga</span>
-                <h2>Katalog Produk Kuliner</h2>
-                <p>Cari menu atau pilih kategori. Klik foto atau nama menu untuk melihat komposisinya.</p>
+                <h2>Katalog Kuliner Desa Pegandon</h2>
+                <p>Cari nama makanan atau filter berdasarkan kategori produk unggulan desa kami.</p>
             </div>
 
-            <div class="catalog-tools">
-                <div class="search-box">
+            <!-- Bar Pencarian & Kategori -->
+            <div class="menu-search-bar">
+                <div class="search-input-group">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="search" id="menuSearch" placeholder="Cari nama makanan atau minuman..." autocomplete="off">
+                    <input type="text" id="menuSearchInput" class="menu-search-input" placeholder="Cari kuliner khas Pegandon...">
                 </div>
-                <div class="cat-chips" id="catChips">
-                    <button class="chip active" data-cat="all">Semua</button>
-                    <button class="chip" data-cat="Jajanan Pasar">Jajanan Pasar</button>
-                    <button class="chip" data-cat="Minuman">Minuman</button>
-                    <button class="chip" data-cat="Cemilan">Cemilan</button>
-                    <button class="chip" data-cat="Makanan Utama">Makanan Utama</button>
-                </div>
+                <select id="menuCategoryFilter" class="menu-category-select" aria-label="Filter Kategori">
+                    <option value="">Semua Kategori</option>
+                    <option value="Jajanan Pasar">Jajanan Pasar</option>
+                    <option value="Minuman">Minuman</option>
+                    <option value="Cemilan">Cemilan</option>
+                    <option value="Makanan Utama">Makanan Utama</option>
+                </select>
+                <button type="button" id="menuSearchBtn" class="menu-search-btn">
+                    <i class="fa-solid fa-search"></i> Cari Menu
+                </button>
             </div>
 
             <div class="table-card shadow-sm">
                 <div class="table-responsive">
-                    <table class="data-table">
+                    <table class="data-table" id="menuDataTable">
                         <thead>
                             <tr>
                                 <th>Kode</th>
@@ -98,17 +311,16 @@
                         </thead>
                         <tbody>
                             <!-- PRODUK 1 -->
-                            <tr data-id="KLN-001" data-name="Risoles Mayo Melted (Isi 5)" data-price="25000" data-img="images/risoles.jpg">
+                            <tr data-id="KLN-001" data-name="Risoles Mayo Pegandon (Isi 5)" data-category="Jajanan Pasar" data-price="25000" data-img="images/risoles.jpg">
                                 <td class="code-col">#KLN-001</td>
                                 <td>
-                                    <div class="img-box-table">
-                                        <img src="images/risoles.jpg" alt="Risoles Mayo" onerror="if(!this.dataset.tried){this.dataset.tried=true;this.src='https://nurse-grin-ql608.hostmora.app/images/risoles.jpg';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">
-                                        <div class="img-fallback"><i class="fa-solid fa-cookie"></i><span>Foto</span></div>
+                                    <div class="img-box-table open-detail" data-id="KLN-001">
+                                        <img src="images/risoles.jpg" alt="Risoles Mayo Pegandon" onerror="this.onerror=null;this.src='https://nurse-grin-ql608.hostmora.app/images/risoles.jpg'">
                                     </div>
                                 </td>
                                 <td>
                                     <div class="product-name-cell">
-                                        <strong>Risoles Mayo Melted (Isi 5)</strong>
+                                        <strong class="open-detail" data-id="KLN-001">Risoles Mayo Pegandon (Isi 5)</strong>
                                         <small>Gurilem Isian Daging Smoked & Keju</small>
                                     </div>
                                 </td>
@@ -117,24 +329,23 @@
                                 <td class="stock-cell">30 Box</td>
                                 <td><span class="status-badge"></span></td>
                                 <td class="action-cell">
-                                    <button class="btn-table-action add-to-cart-btn" data-id="KLN-001" data-name="Risoles Mayo Melted (Isi 5)" data-price="25000" data-img="images/risoles.jpg" title="Masukan Keranjang">
+                                    <button type="button" class="btn-table-action add-to-cart-btn" data-id="KLN-001" data-name="Risoles Mayo Pegandon (Isi 5)" data-price="25000" data-img="images/risoles.jpg" title="Masukan Keranjang">
                                         <i class="fa-solid fa-cart-plus"></i>
                                     </button>
                                 </td>
                             </tr>
 
                             <!-- PRODUK 2 -->
-                            <tr data-id="KLN-002" data-name="Kopi Tubruk Rempah Malabar" data-price="18000" data-img="images/kopi-tubruk.jpg">
+                            <tr data-id="KLN-002" data-name="Kopi Tubruk Pegandon" data-category="Minuman" data-price="18000" data-img="images/kopi-tubruk.jpg">
                                 <td class="code-col">#KLN-002</td>
                                 <td>
-                                    <div class="img-box-table">
-                                        <img src="images/kopi-tubruk.jpg" alt="Kopi Tubruk" onerror="if(!this.dataset.tried){this.dataset.tried=true;this.src='https://nurse-grin-ql608.hostmora.app/images/kopi-tubruk.jpg';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">
-                                        <div class="img-fallback"><i class="fa-solid fa-mug-hot"></i><span>Foto</span></div>
+                                    <div class="img-box-table open-detail" data-id="KLN-002">
+                                        <img src="images/kopi-tubruk.jpg" alt="Kopi Tubruk Pegandon" onerror="this.onerror=null;this.src='https://nurse-grin-ql608.hostmora.app/images/kopi-tubruk.jpg'">
                                     </div>
                                 </td>
                                 <td>
                                     <div class="product-name-cell">
-                                        <strong>Kopi Tubruk Rempah Malabar</strong>
+                                        <strong class="open-detail" data-id="KLN-002">Kopi Tubruk Pegandon</strong>
                                         <small>Botol 500ml - Seduh Dingin / Panas</small>
                                     </div>
                                 </td>
@@ -143,24 +354,23 @@
                                 <td class="stock-cell">15 Botol</td>
                                 <td><span class="status-badge"></span></td>
                                 <td class="action-cell">
-                                    <button class="btn-table-action add-to-cart-btn" data-id="KLN-002" data-name="Kopi Tubruk Rempah Malabar" data-price="18000" data-img="images/kopi-tubruk.jpg" title="Masukan Keranjang">
+                                    <button type="button" class="btn-table-action add-to-cart-btn" data-id="KLN-002" data-name="Kopi Tubruk Pegandon" data-price="18000" data-img="images/kopi-tubruk.jpg" title="Masukan Keranjang">
                                         <i class="fa-solid fa-cart-plus"></i>
                                     </button>
                                 </td>
                             </tr>
 
                             <!-- PRODUK 3 -->
-                            <tr data-id="KLN-003" data-name="Keripik Singkong Pedas Manis" data-price="15000" data-img="images/keripik-singkong.jpg">
+                            <tr data-id="KLN-003" data-name="Keripik Singkong Pegandon" data-category="Cemilan" data-price="15000" data-img="images/keripik-singkong.jpg">
                                 <td class="code-col">#KLN-003</td>
                                 <td>
-                                    <div class="img-box-table">
-                                        <img src="images/keripik-singkong.jpg" alt="Keripik Singkong" onerror="if(!this.dataset.tried){this.dataset.tried=true;this.src='https://nurse-grin-ql608.hostmora.app/images/keripik-singkong.jpg';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">
-                                        <div class="img-fallback"><i class="fa-solid fa-box-open"></i><span>Foto</span></div>
+                                    <div class="img-box-table open-detail" data-id="KLN-003">
+                                        <img src="images/keripik-singkong.jpg" alt="Keripik Singkong Pegandon" onerror="this.onerror=null;this.src='https://nurse-grin-ql608.hostmora.app/images/keripik-singkong.jpg'">
                                     </div>
                                 </td>
                                 <td>
                                     <div class="product-name-cell">
-                                        <strong>Keripik Singkong Pedas Manis</strong>
+                                        <strong class="open-detail" data-id="KLN-003">Keripik Singkong Pegandon</strong>
                                         <small>Netto 250g - Bumbu Balado Original</small>
                                     </div>
                                 </td>
@@ -169,24 +379,23 @@
                                 <td class="stock-cell">5 Bag</td>
                                 <td><span class="status-badge"></span></td>
                                 <td class="action-cell">
-                                    <button class="btn-table-action add-to-cart-btn" data-id="KLN-003" data-name="Keripik Singkong Pedas Manis" data-price="15000" data-img="images/keripik-singkong.jpg" title="Masukan Keranjang">
+                                    <button type="button" class="btn-table-action add-to-cart-btn" data-id="KLN-003" data-name="Keripik Singkong Pegandon" data-price="15000" data-img="images/keripik-singkong.jpg" title="Masukan Keranjang">
                                         <i class="fa-solid fa-cart-plus"></i>
                                     </button>
                                 </td>
                             </tr>
 
                             <!-- PRODUK 4 -->
-                            <tr data-id="KLN-004" data-name="Pempek Pegandon (Promo)" data-price="31500" data-img="images/pempek.jpg">
+                            <tr data-id="KLN-004" data-name="Pempek Pegandon (Promo)" data-category="Makanan Utama" data-price="31500" data-img="images/pempek.jpg">
                                 <td class="code-col">#KLN-004</td>
                                 <td>
-                                    <div class="img-box-table">
-                                        <img src="images/pempek.jpg" alt="Pempek Kapal Selam" onerror="if(!this.dataset.tried){this.dataset.tried=true;this.src='https://nurse-grin-ql608.hostmora.app/images/pempek.jpg';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">
-                                        <div class="img-fallback"><i class="fa-solid fa-bowl-rice"></i><span>Foto</span></div>
+                                    <div class="img-box-table open-detail" data-id="KLN-004">
+                                        <img src="images/pempek.jpg" alt="Pempek Pegandon" onerror="this.onerror=null;this.src='https://nurse-grin-ql608.hostmora.app/images/pempek.jpg'">
                                     </div>
                                 </td>
                                 <td>
                                     <div class="product-name-cell">
-                                        <strong>Pempek Pegandon (Promo)</strong>
+                                        <strong class="open-detail" data-id="KLN-004">Pempek Pegandon (Promo)</strong>
                                         <small>Ikan Tenggiri Asli & Kuah Cuko</small>
                                     </div>
                                 </td>
@@ -195,24 +404,23 @@
                                 <td class="stock-cell">12 Porsi</td>
                                 <td><span class="status-badge"></span></td>
                                 <td class="action-cell">
-                                    <button class="btn-table-action add-to-cart-btn" data-id="KLN-004" data-name="Pempek Pegandon (Promo)" data-price="31500" data-img="images/pempek.jpg" title="Masukan Keranjang">
+                                    <button type="button" class="btn-table-action add-to-cart-btn" data-id="KLN-004" data-name="Pempek Pegandon (Promo)" data-price="31500" data-img="images/pempek.jpg" title="Masukan Keranjang">
                                         <i class="fa-solid fa-cart-plus"></i>
                                     </button>
                                 </td>
                             </tr>
 
                             <!-- PRODUK 5 -->
-                            <tr data-id="KLN-005" data-name="Es Cendol Durian Nangka" data-price="20000" data-img="images/es-cendol.jpg">
+                            <tr data-id="KLN-005" data-name="Es Cendol Pegandon" data-category="Minuman" data-price="20000" data-img="images/es-cendol.jpg">
                                 <td class="code-col">#KLN-005</td>
                                 <td>
-                                    <div class="img-box-table">
-                                        <img src="images/es-cendol.jpg" alt="Es Cendol" onerror="if(!this.dataset.tried){this.dataset.tried=true;this.src='https://nurse-grin-ql608.hostmora.app/images/es-cendol.jpg';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">
-                                        <div class="img-fallback"><i class="fa-solid fa-glass-water"></i><span>Foto</span></div>
+                                    <div class="img-box-table open-detail" data-id="KLN-005">
+                                        <img src="images/es-cendol.jpg" alt="Es Cendol Pegandon" onerror="this.onerror=null;this.src='https://nurse-grin-ql608.hostmora.app/images/es-cendol.jpg'">
                                     </div>
                                 </td>
                                 <td>
                                     <div class="product-name-cell">
-                                        <strong>Es Cendol Durian Nangka</strong>
+                                        <strong class="open-detail" data-id="KLN-005">Es Cendol Pegandon</strong>
                                         <small>Gula Aren Asli & Santan Murni</small>
                                     </div>
                                 </td>
@@ -221,24 +429,23 @@
                                 <td class="stock-cell">0 Cup</td>
                                 <td><span class="status-badge"></span></td>
                                 <td class="action-cell">
-                                    <button class="btn-table-action add-to-cart-btn" data-id="KLN-005" data-name="Es Cendol Durian Nangka" data-price="20000" data-img="images/es-cendol.jpg" title="Masukan Keranjang">
+                                    <button type="button" class="btn-table-action add-to-cart-btn" data-id="KLN-005" data-name="Es Cendol Pegandon" data-price="20000" data-img="images/es-cendol.jpg" title="Masukan Keranjang">
                                         <i class="fa-solid fa-cart-plus"></i>
                                     </button>
                                 </td>
                             </tr>
 
                             <!-- PRODUK 6 -->
-                            <tr data-id="KLN-006" data-name="Kue Lumpur Surabi Kentang (Isi 4)" data-price="22000" data-img="images/kue-lumpur.jpg">
+                            <tr data-id="KLN-006" data-name="Kue Lumpur Pegandon (Isi 4)" data-category="Jajanan Pasar" data-price="22000" data-img="images/kue-lumpur.jpg">
                                 <td class="code-col">#KLN-006</td>
                                 <td>
-                                    <div class="img-box-table">
-                                        <img src="images/kue-lumpur.jpg" alt="Kue Lumpur" onerror="if(!this.dataset.tried){this.dataset.tried=true;this.src='https://nurse-grin-ql608.hostmora.app/images/kue-lumpur.jpg';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">
-                                        <div class="img-fallback"><i class="fa-solid fa-cookie"></i><span>Foto</span></div>
+                                    <div class="img-box-table open-detail" data-id="KLN-006">
+                                        <img src="images/kue-lumpur.jpg" alt="Kue Lumpur Pegandon" onerror="this.onerror=null;this.src='https://nurse-grin-ql608.hostmora.app/images/kue-lumpur.jpg'">
                                     </div>
                                 </td>
                                 <td>
                                     <div class="product-name-cell">
-                                        <strong>Kue Lumpur Surabi Kentang (Isi 4)</strong>
+                                        <strong class="open-detail" data-id="KLN-006">Kue Lumpur Pegandon (Isi 4)</strong>
                                         <small>Topping Kismis & Keju Parut</small>
                                     </div>
                                 </td>
@@ -247,134 +454,19 @@
                                 <td class="stock-cell">20 Box</td>
                                 <td><span class="status-badge"></span></td>
                                 <td class="action-cell">
-                                    <button class="btn-table-action add-to-cart-btn" data-id="KLN-006" data-name="Kue Lumpur Surabi Kentang (Isi 4)" data-price="22000" data-img="images/kue-lumpur.jpg" title="Masukan Keranjang">
+                                    <button type="button" class="btn-table-action add-to-cart-btn" data-id="KLN-006" data-name="Kue Lumpur Pegandon (Isi 4)" data-price="22000" data-img="images/kue-lumpur.jpg" title="Masukan Keranjang">
                                         <i class="fa-solid fa-cart-plus"></i>
                                     </button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                <p class="no-result" id="noResult" style="display:none;">Menu tidak ditemukan. Coba kata kunci atau kategori lain.</p>
+                </div>
+                <div id="noMenuFound" style="display:none; text-align:center; padding:2rem; color:var(--dark-muted);">
+                    <i class="fa-solid fa-bowl-rice" style="font-size:2rem; color:#cbd5e1; margin-bottom:0.5rem; display:block;"></i>
+                    Menu atau kategori khas Pegandon yang Anda cari tidak ditemukan.
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Section Card Showcase / Menu Favorit -->
-    <section id="galeri" class="section">
-        <div class="container">
-            <div class="section-header">
-                <span class="sub-title">Menu Favorit</span>
-                <h2>Rekomendasi Jajanan Terlaris</h2>
-            </div>
-            
-            <div class="fav-viewport" id="favViewport">
-<div class="fav-track" id="favTrack">
-<div class="product-card" data-detail="KLN-001">
-                    <div class="card-badge ">Paling Laris</div>
-                    <div class="card-image">
-                        <img src="images/risoles.jpg" alt="Risoles Mayo Melted" draggable="false" onerror="if(!this.dataset.tried){this.dataset.tried=true;this.src='https://nurse-grin-ql608.hostmora.app/images/risoles.jpg';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">
-                        <div class="img-fallback card-fallback"><i class="fa-solid fa-utensils"></i><span>Foto</span></div>
-                        <div class="card-overlay"><span class="btn-quick-view">Lihat Detail</span></div>
-                    </div>
-                    <div class="card-content">
-                        <span class="card-category">Jajanan Pasar</span>
-                        <h3 class="card-title">Risoles Mayo Melted</h3>
-                        <p class="card-desc">Kulit renyah dengan isian telur, daging sapi asap, dan mayo gurih meleleh.</p>
-                        <div class="card-bottom">
-                            <div class="price-wrap"><span class="current-price">Rp 25.000</span></div>
-                            <button class="btn-card-buy add-to-cart-btn" data-id="KLN-001"><i class="fa-solid fa-cart-shopping"></i> Beli</button>
-                        </div>
-                    </div>
-                </div>
-<div class="product-card" data-detail="KLN-002">
-                    
-                    <div class="card-image">
-                        <img src="images/kopi-tubruk.jpg" alt="Kopi Tubruk Rempah" draggable="false" onerror="if(!this.dataset.tried){this.dataset.tried=true;this.src='https://nurse-grin-ql608.hostmora.app/images/kopi-tubruk.jpg';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">
-                        <div class="img-fallback card-fallback"><i class="fa-solid fa-mug-hot"></i><span>Foto</span></div>
-                        <div class="card-overlay"><span class="btn-quick-view">Lihat Detail</span></div>
-                    </div>
-                    <div class="card-content">
-                        <span class="card-category">Minuman</span>
-                        <h3 class="card-title">Kopi Tubruk Rempah</h3>
-                        <p class="card-desc">Racikan biji kopi robusta pilihan dipadu kapulaga dan kayu manis.</p>
-                        <div class="card-bottom">
-                            <div class="price-wrap"><span class="current-price">Rp 18.000</span></div>
-                            <button class="btn-card-buy add-to-cart-btn" data-id="KLN-002"><i class="fa-solid fa-cart-shopping"></i> Beli</button>
-                        </div>
-                    </div>
-                </div>
-<div class="product-card" data-detail="KLN-004">
-                    <div class="card-badge promo">Hemat 10%</div>
-                    <div class="card-image">
-                        <img src="images/pempek.jpg" alt="Pempek Pegandon" draggable="false" onerror="if(!this.dataset.tried){this.dataset.tried=true;this.src='https://nurse-grin-ql608.hostmora.app/images/pempek.jpg';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">
-                        <div class="img-fallback card-fallback"><i class="fa-solid fa-bowl-rice"></i><span>Foto</span></div>
-                        <div class="card-overlay"><span class="btn-quick-view">Lihat Detail</span></div>
-                    </div>
-                    <div class="card-content">
-                        <span class="card-category">Makanan Utama</span>
-                        <h3 class="card-title">Pempek Pegandon</h3>
-                        <p class="card-desc">Ikan tenggiri asli dengan isian telur utuh dan kuah cuko kental pedas manis.</p>
-                        <div class="card-bottom">
-                            <div class="price-wrap"><span class="old-price">Rp 35.000</span><span class="current-price">Rp 31.500</span></div>
-                            <button class="btn-card-buy add-to-cart-btn" data-id="KLN-004"><i class="fa-solid fa-cart-shopping"></i> Beli</button>
-                        </div>
-                    </div>
-                </div>
-<div class="product-card" data-detail="KLN-005">
-                    
-                    <div class="card-image">
-                        <img src="images/es-cendol.jpg" alt="Es Cendol Durian" draggable="false" onerror="if(!this.dataset.tried){this.dataset.tried=true;this.src='https://nurse-grin-ql608.hostmora.app/images/es-cendol.jpg';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">
-                        <div class="img-fallback card-fallback"><i class="fa-solid fa-glass-water"></i><span>Foto</span></div>
-                        <div class="card-overlay"><span class="btn-quick-view">Lihat Detail</span></div>
-                    </div>
-                    <div class="card-content">
-                        <span class="card-category">Minuman Segar</span>
-                        <h3 class="card-title">Es Cendol Durian</h3>
-                        <p class="card-desc">Cendol tepung beras suji asli dipadu toping daging durian murni dan nangka.</p>
-                        <div class="card-bottom">
-                            <div class="price-wrap"><span class="current-price">Rp 20.000</span></div>
-                            <button class="btn-card-buy add-to-cart-btn" data-id="KLN-005"><i class="fa-solid fa-cart-shopping"></i> Beli</button>
-                        </div>
-                    </div>
-                </div>
-<div class="product-card" data-detail="KLN-003">
-                    
-                    <div class="card-image">
-                        <img src="images/keripik-singkong.jpg" alt="Keripik Singkong Balado" draggable="false" onerror="if(!this.dataset.tried){this.dataset.tried=true;this.src='https://nurse-grin-ql608.hostmora.app/images/keripik-singkong.jpg';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">
-                        <div class="img-fallback card-fallback"><i class="fa-solid fa-box-open"></i><span>Foto</span></div>
-                        <div class="card-overlay"><span class="btn-quick-view">Lihat Detail</span></div>
-                    </div>
-                    <div class="card-content">
-                        <span class="card-category">Cemilan</span>
-                        <h3 class="card-title">Keripik Singkong Balado</h3>
-                        <p class="card-desc">Singkong renyah berbalut bumbu balado pedas manis.</p>
-                        <div class="card-bottom">
-                            <div class="price-wrap"><span class="current-price">Rp 15.000</span></div>
-                            <button class="btn-card-buy add-to-cart-btn" data-id="KLN-003"><i class="fa-solid fa-cart-shopping"></i> Beli</button>
-                        </div>
-                    </div>
-                </div>
-<div class="product-card" data-detail="KLN-006">
-                    
-                    <div class="card-image">
-                        <img src="images/kue-lumpur.jpg" alt="Kue Lumpur Surabi Kentang" draggable="false" onerror="if(!this.dataset.tried){this.dataset.tried=true;this.src='https://nurse-grin-ql608.hostmora.app/images/kue-lumpur.jpg';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">
-                        <div class="img-fallback card-fallback"><i class="fa-solid fa-cookie"></i><span>Foto</span></div>
-                        <div class="card-overlay"><span class="btn-quick-view">Lihat Detail</span></div>
-                    </div>
-                    <div class="card-content">
-                        <span class="card-category">Jajanan Pasar</span>
-                        <h3 class="card-title">Kue Lumpur Surabi Kentang</h3>
-                        <p class="card-desc">Kue lumpur lembut berbahan kentang dengan topping kismis dan keju parut.</p>
-                        <div class="card-bottom">
-                            <div class="price-wrap"><span class="current-price">Rp 22.000</span></div>
-                            <button class="btn-card-buy add-to-cart-btn" data-id="KLN-006"><i class="fa-solid fa-cart-shopping"></i> Beli</button>
-                        </div>
-                    </div>
-                </div>
-</div>
-</div>
-<p class="fav-hint">Bergeser otomatis. Sorot dengan mouse untuk berhenti, atau geser dengan jari/mouse.</p>
         </div>
     </section>
 
@@ -383,23 +475,28 @@
         <div class="container footer-content">
             <div class="logo footer-logo">
                 <div class="logo-icon"><i class="fa-solid fa-bowl-food"></i></div>
-                <div class="logo-text light">Kuliner<span>Nusantara</span></div>
+                <div class="logo-text light">Kuliner<span>Pegandon</span></div>
             </div>
-            <p class="footer-tagline">Menyajikan cita rasa otentik buatan UMKM lokal dengan kualitas rasa terjamin.</p>
-            
-            <!-- Penghitung Jumlah Pengunjung -->
+            <p class="footer-tagline">Menyajikan cita rasa otentik buatan warga Desa Pegandon dengan kualitas rasa terbaik.</p>
+
+            <div class="social-hover-links">
+                <a href="https://wa.me/6287856866682" target="_blank" rel="noopener noreferrer" class="social-btn whatsapp" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://www.instagram.com/ctrlcvyulioputra?fqnt=MW01emU0cmt0eHJoMg==" target="_blank" rel="noopener noreferrer" class="social-btn instagram" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.tiktok.com/@yulioputra0?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" class="social-btn tiktok" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+            </div>
+
             <div class="visitor-badge">
                 <i class="fa-solid fa-eye"></i> Total Pengunjung: <strong id="visitorCount">1</strong> Kali
             </div>
 
             <div class="copyright">
-                <p>&copy; 2026 <strong>UMKM Kuliner Nusantara</strong>. All Rights Reserved.</p>
+                <p>&copy; 2026 <strong>Kuliner Desa Pegandon</strong>. All Rights Reserved.</p>
             </div>
         </div>
     </footer>
 
     <!-- Floating Cart Button -->
-    <button class="cart-float-btn" id="openCartBtn" title="Buka Keranjang Belanja">
+    <button type="button" class="cart-float-btn" id="openCartBtn" title="Buka Keranjang Belanja" aria-label="Buka Keranjang Belanja">
         <i class="fa-solid fa-cart-shopping"></i>
         <span class="cart-counter" id="cartCounter">0</span>
     </button>
@@ -407,15 +504,17 @@
     <!-- Cart Drawer Overlay -->
     <div class="cart-drawer-overlay" id="cartOverlay"></div>
 
-    <!-- Cart Drawer / Sidebar -->
-    <div class="cart-drawer" id="cartDrawer">
+    <!-- Cart Drawer Sidebar -->
+    <aside class="cart-drawer" id="cartDrawer" aria-label="Keranjang Belanja">
         <div class="cart-drawer-header">
             <h3><i class="fa-solid fa-basket-shopping"></i> Keranjang Belanja</h3>
-            <button class="close-cart-btn" id="closeCartBtn"><i class="fa-solid fa-xmark"></i></button>
+            <button type="button" class="close-cart-btn" id="closeCartBtn" aria-label="Tutup Keranjang"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="cart-action-top">
-            <span>Ingin menambah menu lain?</span>
-            <button class="btn-add-more" id="addMoreItemsBtn"><i class="fa-solid fa-plus"></i> Tambah Belanjaan</button>
+            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.82rem; font-weight:700; color:var(--primary-hover);">
+                <input type="checkbox" id="selectAllCart" checked style="accent-color:var(--primary);"> Pilih Semua
+            </label>
+            <button type="button" class="btn-add-more" id="addMoreItemsBtn"><i class="fa-solid fa-plus"></i> Tambah Belanjaan</button>
         </div>
         <div class="cart-drawer-body" id="cartDrawerBody">
             <div class="cart-empty-state">
@@ -425,21 +524,21 @@
         </div>
         <div class="cart-drawer-footer">
             <div class="cart-total-row">
-                <span>Total Pembayaran:</span>
+                <span>Total (<span id="selectedCount">0</span> item):</span>
                 <span class="cart-total-price" id="cartTotalPrice">Rp 0</span>
             </div>
-            <button class="btn-checkout disabled" id="checkoutWhatsappBtn">
+            <button type="button" class="btn-checkout disabled" id="checkoutWhatsappBtn">
                 <i class="fa-solid fa-bag-shopping"></i> Lanjut Checkout
             </button>
         </div>
-    </div>
+    </aside>
 
-    <!-- Custom Dialog Modal -->
+    <!-- Custom Modal Dialog Overlay -->
     <div class="custom-dialog-overlay" id="customDialogOverlay">
         <div class="custom-dialog" id="customDialogBox"></div>
     </div>
 
-    <!-- Link File JavaScript Eksternal -->
+    <!-- Menghubungkan script terpisah -->
     <script src="script.js"></script>
 </body>
 </html>
