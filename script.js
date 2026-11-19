@@ -1119,7 +1119,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // ============================================================
-    // Hero slider: crossfade halus dan berganti setiap 4 detik
+    // Hero slider: seluruh banner berganti otomatis setiap 4 detik
     // ============================================================
     (function initHeroSlider() {
         const hero = document.querySelector(".hero");
@@ -1129,35 +1129,86 @@ document.addEventListener("DOMContentLoaded", function () {
         const badge = document.getElementById("heroBadge");
         const copy = document.querySelector(".hero-slide-copy");
         if (!hero || !dots || !title || !desc || !badge) return;
+
         const slides = [
             { title: 'Aneka Jajanan & Minuman<br><span>Khas Desa Pegandon</span>', desc: 'Nikmati kelezatan jajanan pasar, cemilan renyah, dan minuman segar buatan UMKM Desa Pegandon.', badge: 'Cita Rasa Otentik UMKM', image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1400" },
             { title: 'Rasa Lokal, Kualitas<br><span>Istimewa</span>', desc: 'Temukan pilihan kuliner lokal untuk menemani waktu santai dan kebersamaan keluarga.', badge: 'Pilihan Kuliner Lokal', image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=1400" },
             { title: 'Dukung UMKM<br><span>Desa Pegandon</span>', desc: 'Pesan jajanan favoritmu dengan mudah melalui katalog Kuliner Desa Pegandon.', badge: 'Bangga Produk Desa', image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=1400" }
         ];
+
         const layers = [document.createElement("div"), document.createElement("div")];
-        layers.forEach(layer => { layer.className = "hero-bg-layer"; layer.setAttribute("aria-hidden", "true"); hero.insertBefore(layer, hero.firstChild); });
-        let current = 0, activeLayer = 0, timer = null;
-        slides.forEach((slide, i) => {
-            const dot = document.createElement("button"); dot.type = "button"; dot.className = "hero-dot" + (i === 0 ? " active" : "");
-            dot.setAttribute("aria-label", "Banner " + (i + 1)); dot.addEventListener("click", () => show(i)); dots.appendChild(dot);
+        layers.forEach(layer => {
+            layer.className = "hero-bg-layer";
+            layer.setAttribute("aria-hidden", "true");
+            hero.insertBefore(layer, hero.firstChild);
         });
-        function show(i) {
-            current = (i + slides.length) % slides.length;
-            const nextLayer = 1 - activeLayer;
-            layers[nextLayer].style.backgroundImage = `linear-gradient(rgba(30,41,59,.82),rgba(30,41,59,.86)), url("${slides[current].image}")`;
-            layers[nextLayer].classList.add("visible"); layers[activeLayer].classList.remove("visible"); activeLayer = nextLayer;
-            if (copy) copy.classList.add("changing");
-            title.innerHTML = slides[current].title; desc.textContent = slides[current].desc;
-            badge.innerHTML = '<i class="fa-solid fa-fire"></i> ' + slides[current].badge;
-            requestAnimationFrame(() => { if (copy) copy.classList.remove("changing"); });
-            dots.querySelectorAll(".hero-dot").forEach((d, n) => d.classList.toggle("active", n === current));
+
+        let current = 0;
+        let activeLayer = 0;
+        let timer = null;
+        let textTimer = null;
+
+        slides.forEach((slide, i) => {
+            const dot = document.createElement("button");
+            dot.type = "button";
+            dot.className = "hero-dot" + (i === 0 ? " active" : "");
+            dot.setAttribute("aria-label", "Tampilkan banner " + (i + 1));
+            dot.addEventListener("click", () => {
+                show(i);
+                start();
+            });
+            dots.appendChild(dot);
+        });
+
+        function updateCopy(slide) {
+            title.innerHTML = slide.title;
+            desc.textContent = slide.desc;
+            badge.innerHTML = '<i class="fa-solid fa-fire"></i> ' + slide.badge;
         }
-        function stop() { if (timer) clearInterval(timer); timer = null; }
-        function start() { stop(); if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) timer = setInterval(() => show(current + 1), 4000); }
-        hero.addEventListener("mouseenter", stop); hero.addEventListener("mouseleave", start);
-        hero.addEventListener("focusin", stop); hero.addEventListener("focusout", start);
-        layers[0].style.backgroundImage = `linear-gradient(rgba(30,41,59,.82),rgba(30,41,59,.86)), url("${slides[0].image}")`;
-        layers[0].classList.add("visible"); show(0); start();
+
+        function show(i) {
+            const next = (i + slides.length) % slides.length;
+            if (textTimer) clearTimeout(textTimer);
+            current = next;
+
+            // Crossfade gambar latar
+            const nextLayer = 1 - activeLayer;
+            layers[nextLayer].style.backgroundImage = `linear-gradient(rgba(30,41,59,.76),rgba(30,41,59,.82)), url("${slides[current].image}")`;
+            layers[nextLayer].classList.add("visible");
+            layers[activeLayer].classList.remove("visible");
+            activeLayer = nextLayer;
+
+            // Fade teks keluar, ganti isi, lalu fade masuk
+            if (copy) copy.classList.add("changing");
+            textTimer = setTimeout(() => {
+                updateCopy(slides[current]);
+                requestAnimationFrame(() => {
+                    if (copy) copy.classList.remove("changing");
+                });
+            }, 260);
+
+            dots.querySelectorAll(".hero-dot").forEach((dot, index) => {
+                dot.classList.toggle("active", index === current);
+            });
+        }
+
+        function stop() {
+            if (timer) clearInterval(timer);
+            timer = null;
+        }
+
+        function start() {
+            stop();
+            if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                timer = setInterval(() => show(current + 1), 4000);
+            }
+        }
+
+        // Mulai dari slide pertama. Slider tetap berjalan meskipun kursor berada di atas banner.
+        layers[0].style.backgroundImage = `linear-gradient(rgba(30,41,59,.76),rgba(30,41,59,.82)), url("${slides[0].image}")`;
+        layers[0].classList.add("visible");
+        updateCopy(slides[0]);
+        start();
     })();
 
     // ============================================================

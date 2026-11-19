@@ -8,7 +8,7 @@
 - `images/` — letakkan folder foto produk milik Anda di sini (sejajar dengan index.html)
 
 ## Pembaruan animasi dan pencarian
-- Banner utama berganti otomatis setiap 4 detik dengan transisi crossfade.
+- Banner utama (gambar, judul, deskripsi, dan badge) berganti otomatis setiap 4 detik dengan crossfade. Slider tetap berjalan saat kursor berada di atas banner; tombol titik dapat digunakan untuk memilih slide secara manual.
 - Menu Favorit berjalan terus satu arah dengan animasi transform yang halus, dapat dijeda saat kursor berada di atasnya, dan dapat digeser dengan mouse atau sentuhan.
 - Kolom pencarian menyediakan pilihan `Nama Produk` atau `Kategori`.
 - Filter kategori yang tersedia tetap dapat digunakan bersama pencarian.
