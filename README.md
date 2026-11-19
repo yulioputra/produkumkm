@@ -5,7 +5,7 @@
 - `style.css` — tampilan desktop dan perangkat seluler
 - `script.js` — interaksi dan fitur website
 - `CNAME` — domain website
-- `images/` — letakkan folder foto produk milik Anda di sini (sejajar dengan index.html)
+- `images/` — folder foto 
 
 ## Pembaruan animasi dan pencarian
 - Banner utama (gambar, judul, deskripsi, dan badge) berganti otomatis setiap 4 detik dengan crossfade. Slider tetap berjalan saat kursor berada di atas banner; tombol titik dapat digunakan untuk memilih slide secara manual.
