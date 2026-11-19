@@ -1023,32 +1023,50 @@ document.addEventListener("DOMContentLoaded", function () {
     if (stockLogNavBtn) stockLogNavBtn.addEventListener("click", e => { e.preventDefault(); showStockLog(); });
 
     // ============================================================
-    // 11. Pencarian & Kategori
+    // 11. Pencarian berdasarkan nama atau kategori + filter kategori
     // ============================================================
     let activeCat = "all";
     const searchInput = document.getElementById("menuSearch");
+    const searchMode = document.getElementById("searchMode");
+    const categorySearch = document.getElementById("categorySearch");
+    const searchNameWrap = document.getElementById("searchNameWrap");
     function applyFilter() {
-        const q = searchInput.value.trim().toLowerCase();
+        const mode = searchMode ? searchMode.value : "name";
+        const q = searchInput ? searchInput.value.trim().toLowerCase() : "";
+        const selectedSearchCat = mode === "category" && categorySearch ? categorySearch.value : "";
         let shown = 0;
         document.querySelectorAll(".data-table tbody tr").forEach(row => {
-            const cat = row.querySelector(".category-tag").textContent.trim();
-            const hay = (row.dataset.name + " " + row.querySelector(".product-name-cell small").textContent).toLowerCase();
-            const ok = (activeCat === "all" || cat === activeCat) && (!q || hay.indexOf(q) !== -1);
+            const tag = row.querySelector(".category-tag");
+            const cat = tag ? tag.textContent.trim() : "";
+            const name = (row.dataset.name || "").toLowerCase();
+            const detail = row.querySelector(".product-name-cell small");
+            const description = detail ? detail.textContent.toLowerCase() : "";
+            const matchName = mode !== "name" || !q || (name + " " + description).includes(q);
+            const matchSearchCat = mode !== "category" || !selectedSearchCat || cat === selectedSearchCat;
+            const matchChipCat = activeCat === "all" || cat === activeCat;
+            const ok = matchName && matchSearchCat && matchChipCat;
             row.style.display = ok ? "" : "none";
             if (ok) shown++;
         });
-        document.getElementById("noResult").style.display = shown ? "none" : "block";
+        const noResult = document.getElementById("noResult");
+        if (noResult) noResult.style.display = shown ? "none" : "block";
     }
-    if (searchInput) {
-        searchInput.addEventListener("input", applyFilter);
-        document.getElementById("catChips").addEventListener("click", e => {
-            const chip = e.target.closest(".chip");
-            if (!chip) return;
-            activeCat = chip.dataset.cat;
-            document.querySelectorAll("#catChips .chip").forEach(x => x.classList.toggle("active", x === chip));
-            applyFilter();
-        });
-    }
+    if (searchInput) searchInput.addEventListener("input", applyFilter);
+    if (searchMode) searchMode.addEventListener("change", () => {
+        const byCategory = searchMode.value === "category";
+        if (searchNameWrap) searchNameWrap.hidden = byCategory;
+        if (categorySearch) categorySearch.hidden = !byCategory;
+        applyFilter();
+    });
+    if (categorySearch) categorySearch.addEventListener("change", applyFilter);
+    const catChips = document.getElementById("catChips");
+    if (catChips) catChips.addEventListener("click", e => {
+        const chip = e.target.closest(".chip");
+        if (!chip) return;
+        activeCat = chip.dataset.cat;
+        catChips.querySelectorAll(".chip").forEach(x => x.classList.toggle("active", x === chip));
+        applyFilter();
+    });
 
     // ============================================================
     // 12. Modal Detail (komposisi bahan, tanpa lokasi/asal daerah)
@@ -1101,7 +1119,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // ============================================================
-    // Hero slider otomatis, searah, dan dapat dipilih lewat dots
+    // Hero slider: crossfade halus dan berganti setiap 4 detik
     // ============================================================
     (function initHeroSlider() {
         const hero = document.querySelector(".hero");
@@ -1109,85 +1127,91 @@ document.addEventListener("DOMContentLoaded", function () {
         const title = document.getElementById("heroTitle");
         const desc = document.getElementById("heroDescription");
         const badge = document.getElementById("heroBadge");
+        const copy = document.querySelector(".hero-slide-copy");
         if (!hero || !dots || !title || !desc || !badge) return;
         const slides = [
             { title: 'Aneka Jajanan & Minuman<br><span>Khas Desa Pegandon</span>', desc: 'Nikmati kelezatan jajanan pasar, cemilan renyah, dan minuman segar buatan UMKM Desa Pegandon.', badge: 'Cita Rasa Otentik UMKM', image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1400" },
             { title: 'Rasa Lokal, Kualitas<br><span>Istimewa</span>', desc: 'Temukan pilihan kuliner lokal untuk menemani waktu santai dan kebersamaan keluarga.', badge: 'Pilihan Kuliner Lokal', image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=1400" },
             { title: 'Dukung UMKM<br><span>Desa Pegandon</span>', desc: 'Pesan jajanan favoritmu dengan mudah melalui katalog Kuliner Desa Pegandon.', badge: 'Bangga Produk Desa', image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=1400" }
         ];
-        let current = 0, timer = null;
-        slides.forEach((s, i) => { const b = document.createElement("button"); b.type = "button"; b.className = "hero-dot" + (i === 0 ? " active" : ""); b.setAttribute("aria-label", "Banner " + (i + 1)); b.addEventListener("click", () => show(i)); dots.appendChild(b); });
-        function show(i) { current = (i + slides.length) % slides.length; title.innerHTML = slides[current].title; desc.textContent = slides[current].desc; badge.innerHTML = '<i class="fa-solid fa-fire"></i> ' + slides[current].badge; hero.style.setProperty("--hero-image", `url("${slides[current].image}")`); dots.querySelectorAll(".hero-dot").forEach((d, n) => d.classList.toggle("active", n === current)); }
-        function start() { stop(); if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) timer = setInterval(() => show(current + 1), 5000); }
+        const layers = [document.createElement("div"), document.createElement("div")];
+        layers.forEach(layer => { layer.className = "hero-bg-layer"; layer.setAttribute("aria-hidden", "true"); hero.insertBefore(layer, hero.firstChild); });
+        let current = 0, activeLayer = 0, timer = null;
+        slides.forEach((slide, i) => {
+            const dot = document.createElement("button"); dot.type = "button"; dot.className = "hero-dot" + (i === 0 ? " active" : "");
+            dot.setAttribute("aria-label", "Banner " + (i + 1)); dot.addEventListener("click", () => show(i)); dots.appendChild(dot);
+        });
+        function show(i) {
+            current = (i + slides.length) % slides.length;
+            const nextLayer = 1 - activeLayer;
+            layers[nextLayer].style.backgroundImage = `linear-gradient(rgba(30,41,59,.82),rgba(30,41,59,.86)), url("${slides[current].image}")`;
+            layers[nextLayer].classList.add("visible"); layers[activeLayer].classList.remove("visible"); activeLayer = nextLayer;
+            if (copy) copy.classList.add("changing");
+            title.innerHTML = slides[current].title; desc.textContent = slides[current].desc;
+            badge.innerHTML = '<i class="fa-solid fa-fire"></i> ' + slides[current].badge;
+            requestAnimationFrame(() => { if (copy) copy.classList.remove("changing"); });
+            dots.querySelectorAll(".hero-dot").forEach((d, n) => d.classList.toggle("active", n === current));
+        }
         function stop() { if (timer) clearInterval(timer); timer = null; }
-        hero.addEventListener("mouseenter", stop); hero.addEventListener("mouseleave", start); hero.addEventListener("focusin", stop); hero.addEventListener("focusout", start);
-        show(0); start();
+        function start() { stop(); if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) timer = setInterval(() => show(current + 1), 4000); }
+        hero.addEventListener("mouseenter", stop); hero.addEventListener("mouseleave", start);
+        hero.addEventListener("focusin", stop); hero.addEventListener("focusout", start);
+        layers[0].style.backgroundImage = `linear-gradient(rgba(30,41,59,.82),rgba(30,41,59,.86)), url("${slides[0].image}")`;
+        layers[0].classList.add("visible"); show(0); start();
     })();
 
     // ============================================================
-    // 13. Menu Favorit: berjalan otomatis searah, berhenti saat disorot, bisa digeser
+    // 13. Menu Favorit: marquee seamless berbasis transform GPU
     // ============================================================
     (function initFavorites() {
-        const vp = document.getElementById("favViewport");
+        const viewport = document.getElementById("favViewport");
         const track = document.getElementById("favTrack");
-        if (!vp || !track) return;
-        const n = track.children.length;
-        for (let c = 0; c < 2; c++) {          // 3 salinan agar putaran mulus
-            for (let i = 0; i < n; i++) {
-                const k = track.children[i].cloneNode(true);
-                k.setAttribute("aria-hidden", "true");
-                track.appendChild(k);
+        if (!viewport || !track || !track.children.length) return;
+        const originalCount = track.children.length;
+        for (let copy = 0; copy < 2; copy++) {
+            for (let i = 0; i < originalCount; i++) {
+                const clone = track.children[i].cloneNode(true); clone.setAttribute("aria-hidden", "true"); track.appendChild(clone);
             }
         }
-        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        const SPEED = 40;                       // piksel per detik
-        const period = () => track.children[n].offsetLeft - track.children[0].offsetLeft;
-        let paused = false, down = false, sx = 0, sl = 0, pos = period(), last = 0, resumeTimer = 0;
-        vp.scrollLeft = pos;
-
-        function tick(t) {
-            const dt = Math.min(t - (last || t), 50) / 1000;
-            last = t;
-            if (!paused && !down && !reduce) {
-                const w = period();
-                pos += SPEED * dt;
-                if (pos >= 2 * w) pos -= w;
-                vp.scrollLeft = pos;
-            }
-            requestAnimationFrame(tick);
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const SPEED = 34;
+        let loopWidth = 0, position = 0, lastFrame = 0, paused = false, dragging = false, startX = 0, startPosition = 0;
+        function measure() {
+            const firstClone = track.children[originalCount];
+            loopWidth = firstClone ? firstClone.offsetLeft - track.children[0].offsetLeft : track.scrollWidth / 3;
+            if (loopWidth > 0) position = ((position % loopWidth) + loopWidth) % loopWidth;
+            render();
         }
-        requestAnimationFrame(tick);
-
-        vp.addEventListener("scroll", () => {   // jaga posisi tetap di salinan tengah saat digeser manual
-            if (!paused && !down) return;
-            const w = period(), s = vp.scrollLeft;
-            if (s < w) { vp.scrollLeft = s + w; sl += w; }
-            else if (s >= 2 * w) { vp.scrollLeft = s - w; sl -= w; }
+        function render() { track.style.transform = `translate3d(${-position}px,0,0)`; }
+        function frame(now) {
+            const delta = lastFrame ? Math.min((now - lastFrame) / 1000, 0.05) : 0; lastFrame = now;
+            if (!paused && !dragging && !reducedMotion && loopWidth > 0) {
+                position += SPEED * delta; if (position >= loopWidth) position -= loopWidth; render();
+            }
+            requestAnimationFrame(frame);
+        }
+        measure(); requestAnimationFrame(frame);
+        window.addEventListener("resize", measure);
+        viewport.addEventListener("mouseenter", () => { paused = true; });
+        viewport.addEventListener("mouseleave", () => { if (!dragging) paused = false; });
+        viewport.addEventListener("pointerdown", event => {
+            if (event.pointerType === "mouse" && event.button !== 0) return;
+            dragging = true; paused = true; startX = event.clientX; startPosition = position; favDragged = false;
+            if (viewport.setPointerCapture) viewport.setPointerCapture(event.pointerId);
         });
-
-        function resume() { pos = vp.scrollLeft; paused = false; }
-        vp.addEventListener("mouseenter", () => { paused = true; });
-        vp.addEventListener("mouseleave", () => { if (!down) resume(); });
-        vp.addEventListener("touchstart", () => { clearTimeout(resumeTimer); paused = true; }, { passive: true });
-        vp.addEventListener("touchend", () => { clearTimeout(resumeTimer); resumeTimer = setTimeout(resume, 1500); }, { passive: true });
-
-        vp.addEventListener("pointerdown", e => {
-            if (e.pointerType !== "mouse" || e.button !== 0) return;
-            down = true; sx = e.clientX; sl = vp.scrollLeft; favDragged = false;
+        viewport.addEventListener("pointermove", event => {
+            if (!dragging) return;
+            const dx = event.clientX - startX; if (Math.abs(dx) > 5) favDragged = true;
+            position = ((startPosition - dx) % loopWidth + loopWidth) % loopWidth; render();
         });
-        window.addEventListener("pointermove", e => {
-            if (!down) return;
-            const dx = e.clientX - sx;
-            if (Math.abs(dx) > 5) { favDragged = true; vp.classList.add("dragging"); }
-            vp.scrollLeft = sl - dx;
-        });
-        window.addEventListener("pointerup", () => {
-            if (!down) return;
-            down = false;
-            vp.classList.remove("dragging");
-            pos = vp.scrollLeft;
+        function finishDrag() {
+            if (!dragging) return; dragging = false; viewport.classList.remove("dragging");
+            if (!viewport.matches(":hover")) paused = false;
             setTimeout(() => { favDragged = false; }, 0);
-        });
+        }
+        viewport.addEventListener("pointerup", finishDrag); viewport.addEventListener("pointercancel", finishDrag);
+        viewport.addEventListener("touchstart", () => { paused = true; }, { passive: true });
+        viewport.addEventListener("touchend", () => { if (!dragging) paused = false; }, { passive: true });
     })();
 
     // ============================================================

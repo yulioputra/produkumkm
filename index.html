@@ -189,9 +189,23 @@
             </div>
 
             <div class="catalog-tools">
-                <div class="search-box">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="search" id="menuSearch" placeholder="Cari nama makanan atau minuman..." autocomplete="off">
+                <div class="search-box search-controls">
+                    <label class="search-mode-wrap" for="searchMode">Cari berdasarkan</label>
+                    <select id="searchMode" aria-label="Cari berdasarkan">
+                        <option value="name">Nama Produk</option>
+                        <option value="category">Kategori</option>
+                    </select>
+                    <div class="search-input-wrap" id="searchNameWrap">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="search" id="menuSearch" placeholder="Masukkan nama makanan atau minuman..." autocomplete="off">
+                    </div>
+                    <select id="categorySearch" aria-label="Pilih kategori" hidden>
+                        <option value="">Semua kategori</option>
+                        <option value="Jajanan Pasar">Jajanan Pasar</option>
+                        <option value="Minuman">Minuman</option>
+                        <option value="Cemilan">Cemilan</option>
+                        <option value="Makanan Utama">Makanan Utama</option>
+                    </select>
                 </div>
                 <div class="cat-chips" id="catChips">
                     <button class="chip active" data-cat="all">Semua</button>
