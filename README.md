@@ -8,7 +8,7 @@ Pilih salah satu:
 2. **Lewat XAMPP:** taruh folder ini di `C:\xampp\htdocs\`, nyalakan Apache, lalu buka `http://localhost/kuliner-umkm/`.
 3. **Lewat VS Code:** pasang ekstensi *Live Server*, klik kanan `index.html`, pilih *Open with Live Server*.
 
-Login admin: `admin` / `admin123`.
+Login admin: `yulio` / `admin123`. Member: daftar bebas lewat tombol **Login / Daftar**.
 
 ## 🚀 Fitur
 * Stok berkurang otomatis setelah pesanan dibuat; keranjang kembali ke 0.
@@ -17,6 +17,12 @@ Login admin: `admin` / `admin123`.
 * **Riwayat Pesanan** (menu navbar).
 * **Riwayat Stok** (khusus admin): siapa mengubah stok, sebelum → sesudah, dan alasannya.
 * Admin bisa mengedit stok langsung di tabel.
+
+* **Menu Favorit** bergeser otomatis searah; berhenti dan zoom saat disorot mouse; bisa digeser dengan jari/mouse.
+* **Pencarian & kategori** di atas tabel katalog.
+* **Detail jajanan**: klik foto/nama menu untuk melihat komposisi bahan.
+* **Keranjang**: centang produk sebelum checkout; jumlah tidak boleh 0/kosong.
+* **Member**: riwayat pesanan tersimpan permanen. Non-member: riwayat terhapus dalam 24 jam.
 
 ## ⚠️ Catatan
 Data (stok, pesanan, riwayat) disimpan di **browser** lewat `localStorage`, tanpa server. Artinya:
