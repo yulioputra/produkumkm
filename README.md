@@ -1,4 +1,4 @@
-# 🍲 Katalog Kuliner & Jajanan UMKM Nusantara
+# 🍲 Kuliner Desa Pegandon
 
 Website katalog kuliner interaktif buatan UMKM lokal (HTML, CSS, JavaScript). **Tanpa server, tanpa instalasi**: cukup buka `index.html`.
 
@@ -8,7 +8,7 @@ Pilih salah satu:
 2. **Lewat XAMPP:** taruh folder ini di `C:\xampp\htdocs\`, nyalakan Apache, lalu buka `http://localhost/kuliner-umkm/`.
 3. **Lewat VS Code:** pasang ekstensi *Live Server*, klik kanan `index.html`, pilih *Open with Live Server*.
 
-Login admin: `yulio` / `admin123`. Member: daftar bebas lewat tombol **Login / Daftar**.
+Login admin menggunakan akun pengelola yang telah dikonfigurasi. Member dapat mendaftar melalui tombol **Login / Daftar**.
 
 ## 🚀 Fitur
 * Stok berkurang otomatis setelah pesanan dibuat; keranjang kembali ke 0.
@@ -16,7 +16,7 @@ Login admin: `yulio` / `admin123`. Member: daftar bebas lewat tombol **Login / D
 * Setelah selesai, teks pesanan lengkap dikirim ke WhatsApp penjual.
 * **Riwayat Pesanan** (menu navbar).
 * **Riwayat Stok** (khusus admin): siapa mengubah stok, sebelum → sesudah, dan alasannya.
-* Admin bisa mengedit stok langsung di tabel.
+* Admin bisa mengedit stok, nama produk, dan harga langsung dari tabel; perubahan nama dan harga disimpan di localStorage.
 
 * **Menu Favorit** bergeser otomatis searah; berhenti dan zoom saat disorot mouse; bisa digeser dengan jari/mouse.
 * **Pencarian & kategori** di atas tabel katalog.
@@ -42,3 +42,10 @@ kuliner-umkm/
 
 ## 🐙 Upload ke GitHub
 Semua isi folder ini boleh di-upload (tidak ada data pribadi di dalamnya). Pastikan folder `images/` ikut. Agar bisa dibuka lewat link, aktifkan **GitHub Pages**: repo → *Settings* → *Pages* → *Deploy from a branch* → branch `main`, folder `/ (root)` → *Save*.
+
+
+## Catatan Fitur dan Keamanan
+- Banner utama berganti otomatis searah setiap 5 detik dan dapat dipilih melalui indikator titik.
+- Nama produk dapat diedit admin dari tombol pensil di kolom tindakan.
+- Semua perubahan localStorage hanya berlaku pada browser/perangkat yang sama.
+- **Penting:** login admin pada versi statis ini masih diperiksa di JavaScript sisi browser. Ini bukan sistem autentikasi aman untuk produksi. Jangan gunakan kredensial penting atau data pelanggan sungguhan sebelum dipindahkan ke backend dengan autentikasi server.

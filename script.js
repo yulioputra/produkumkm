@@ -157,6 +157,20 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         if (route === "/logout" && method === "POST") return { ok: true };
 
+        let detailMatch = route.match(/^\/products\/([^/]+)\/details$/);
+        if (detailMatch && method === "PUT") {
+            needAdmin();
+            const id = decodeURIComponent(detailMatch[1]);
+            const name = String(body.name || "").trim().slice(0, 70);
+            const price = Number(body.price);
+            if (!products[id]) throw httpError(404, "Produk tidak ditemukan.");
+            if (name.length < 3) throw httpError(400, "Nama produk minimal 3 karakter.");
+            if (!Number.isInteger(price) || price < 1 || price > 100000000) throw httpError(400, "Harga harus berupa angka lebih dari 0.");
+            products[id].name = name; products[id].price = price;
+            const edits = lsGet(LS_PRODUCT_EDITS, {}); edits[id] = { name, price }; lsSet(LS_PRODUCT_EDITS, edits);
+            return { id, name, price };
+        }
+
         let m = route.match(/^\/products\/([^/]+)\/stock$/);
         if (m && method === "PUT") {
             needAdmin();
@@ -216,7 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
         lsSet(LS_MY_ORDERS, []);
     }
     function guestWarnHtml() {
-        return `<div class="guest-warn"><i class="fa-solid fa-triangle-exclamation"></i> Anda belum login sebagai member. Riwayat pesanan akan terhapus otomatis dalam 24 jam. <a href="#" class="warn-login">Login / Daftar</a> agar tersimpan permanen.</div>`;
+        return `<div class="guest-warn"><i class="fa-solid fa-triangle-exclamation"></i> Anda belum login sebagai member. Riwayat pesanan akan terhapus otomatis dalam 24 jam. Login atau daftar agar riwayat tersimpan permanen.<div class="guest-auth-actions"><button type="button" class="guest-auth-btn warn-login">Sign In</button><button type="button" class="guest-auth-btn warn-register">Sign Up</button></div></div>`;
     }
 
     // ============================================================
@@ -243,12 +257,14 @@ document.addEventListener("DOMContentLoaded", function () {
     // 2. Data Produk & Stok (disimpan di browser)
     // ============================================================
     const products = {};
+    const LS_PRODUCT_EDITS = "pegandon_product_edits_v1";
+    const savedProductEdits = lsGet(LS_PRODUCT_EDITS, {});
     document.querySelectorAll(".data-table tbody tr").forEach(row => {
         const raw = row.querySelector(".stock-cell").textContent.trim();
         products[row.dataset.id] = {
             id: row.dataset.id,
-            name: row.dataset.name,
-            price: parseInt(row.dataset.price),
+            name: savedProductEdits[row.dataset.id]?.name || row.dataset.name,
+            price: Number(savedProductEdits[row.dataset.id]?.price || row.dataset.price),
             img: row.dataset.img,
             unit: raw.replace(/[0-9]/g, "").trim() || "Pcs",
             initialStock: parseInt(raw.replace(/[^0-9]/g, "")) || 0
@@ -336,6 +352,15 @@ document.addEventListener("DOMContentLoaded", function () {
             const stockCell = row.querySelector(".stock-cell");
             const statusBadge = row.querySelector(".status-badge");
             const actionCell = row.querySelector(".action-cell");
+            const nameStrong = row.querySelector(".product-name-cell strong");
+            const priceCell = row.querySelector(".price-cell");
+            if (nameStrong) nameStrong.textContent = p.name;
+            row.dataset.name = p.name; row.dataset.price = String(p.price);
+            if (priceCell) { priceCell.dataset.price = String(p.price); priceCell.innerHTML = rupiah(p.price); }
+            document.querySelectorAll(`.product-card[data-detail="${id}"]`).forEach(card => {
+                const title = card.querySelector(".card-title"); const price = card.querySelector(".current-price");
+                if (title) title.textContent = p.name; if (price) price.textContent = rupiah(p.price);
+            });
 
             if (isAdmin()) {
                 // Jangan timpa input jika admin sedang mengetik di baris ini
@@ -370,6 +395,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         </button>`;
                 }
             }
+            if (isAdmin()) {
+                if (!actionCell.querySelector(".edit-product-btn")) actionCell.insertAdjacentHTML("beforeend", `<button class="btn-table-action edit-product-btn" data-id="${id}" title="Edit Nama & Harga"><i class="fa-solid fa-pen"></i></button>`);
+            } else {
+                actionCell.querySelector(".edit-product-btn")?.remove();
+            }
         });
     }
 
@@ -392,6 +422,33 @@ document.addEventListener("DOMContentLoaded", function () {
         await refreshStocks();
     });
 
+    document.addEventListener("click", async function (e) {
+        const editBtn = e.target.closest(".edit-product-btn");
+        if (!editBtn || !isAdmin()) return;
+        const id = editBtn.dataset.id; const p = products[id]; if (!p) return;
+        openDialog(`<h3><i class="fa-solid fa-pen-to-square"></i> Edit Nama & Harga</h3>
+            <label class="form-label" for="editProductName">Nama Produk</label>
+            <input id="editProductName" type="text" maxlength="70" value="${escapeHtml(p.name)}">
+            <label class="form-label" for="editProductPrice">Harga (Rupiah)</label>
+            <input id="editProductPrice" type="number" min="1" step="1" value="${p.price}">
+            <p class="form-error" id="editProductError" style="display:none"></p>
+            <div class="custom-dialog-buttons"><button class="custom-dialog-btn btn-dialog-cancel" id="editProductCancel">Batal</button><button class="custom-dialog-btn btn-dialog-confirm" id="editProductSave">Simpan Perubahan</button></div>`, "checkout");
+        bindClose("editProductCancel");
+        document.getElementById("editProductSave").onclick = async () => {
+            const name = document.getElementById("editProductName").value.trim();
+            const price = Number(document.getElementById("editProductPrice").value);
+            const err = document.getElementById("editProductError");
+            if (name.length < 3 || !Number.isInteger(price) || price < 1) { err.textContent = "Nama minimal 3 karakter dan harga harus lebih dari 0."; err.style.display = "block"; return; }
+            try { await api("/products/" + encodeURIComponent(id) + "/details", { method: "PUT", body: JSON.stringify({ name, price }) });
+                const row = document.querySelector(`.data-table tr[data-id="${id}"]`);
+                row.querySelectorAll(".add-to-cart-btn").forEach(b => { b.dataset.name = name; b.dataset.price = price; });
+                cart.forEach(item => { if (item.id === id) { item.name = name; item.price = price; } });
+                closeDialog(); renderStocks(); updateCartUI();
+                infoDialog("fa-solid fa-circle-check", "var(--primary)", "Perubahan Disimpan", "Nama dan harga produk berhasil disimpan di browser ini.");
+            } catch (err2) { err.textContent = err2.message || "Gagal menyimpan perubahan."; err.style.display = "block"; }
+        };
+    });
+
     // ============================================================
     // 5. Login / Logout Admin
     // ============================================================
@@ -406,6 +463,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     document.addEventListener("click", function (e) {
         if (e.target.closest(".warn-login")) { e.preventDefault(); showAuthDialog("login"); }
+        if (e.target.closest(".warn-register")) { e.preventDefault(); showAuthDialog("register"); }
     });
 
     function startMember(u, name) {
@@ -813,7 +871,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function buildWaMessage(order) {
-        let msg = `Halo Admin, saya ingin memesan dari Katalog Kuliner Nusantara.\n\n`;
+        let msg = `Halo Admin, saya ingin memesan dari Kuliner Desa Pegandon.\n\n`;
         msg += `*No. Pesanan:* ${order.id}\n`;
         msg += `*Waktu:* ${formatTime(order.time)}\n\n`;
         msg += `*DATA PEMESAN*\n`;
@@ -1041,6 +1099,30 @@ document.addEventListener("DOMContentLoaded", function () {
         const card = e.target.closest(".product-card[data-detail]");
         if (card && e.target.closest(".card-image, .card-title, .card-desc")) openDetail(card.dataset.detail);
     });
+
+    // ============================================================
+    // Hero slider otomatis, searah, dan dapat dipilih lewat dots
+    // ============================================================
+    (function initHeroSlider() {
+        const hero = document.querySelector(".hero");
+        const dots = document.getElementById("heroDots");
+        const title = document.getElementById("heroTitle");
+        const desc = document.getElementById("heroDescription");
+        const badge = document.getElementById("heroBadge");
+        if (!hero || !dots || !title || !desc || !badge) return;
+        const slides = [
+            { title: 'Aneka Jajanan & Minuman<br><span>Khas Desa Pegandon</span>', desc: 'Nikmati kelezatan jajanan pasar, cemilan renyah, dan minuman segar buatan UMKM Desa Pegandon.', badge: 'Cita Rasa Otentik UMKM', image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1400" },
+            { title: 'Rasa Lokal, Kualitas<br><span>Istimewa</span>', desc: 'Temukan pilihan kuliner lokal untuk menemani waktu santai dan kebersamaan keluarga.', badge: 'Pilihan Kuliner Lokal', image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=1400" },
+            { title: 'Dukung UMKM<br><span>Desa Pegandon</span>', desc: 'Pesan jajanan favoritmu dengan mudah melalui katalog Kuliner Desa Pegandon.', badge: 'Bangga Produk Desa', image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=1400" }
+        ];
+        let current = 0, timer = null;
+        slides.forEach((s, i) => { const b = document.createElement("button"); b.type = "button"; b.className = "hero-dot" + (i === 0 ? " active" : ""); b.setAttribute("aria-label", "Banner " + (i + 1)); b.addEventListener("click", () => show(i)); dots.appendChild(b); });
+        function show(i) { current = (i + slides.length) % slides.length; title.innerHTML = slides[current].title; desc.textContent = slides[current].desc; badge.innerHTML = '<i class="fa-solid fa-fire"></i> ' + slides[current].badge; hero.style.setProperty("--hero-image", `url("${slides[current].image}")`); dots.querySelectorAll(".hero-dot").forEach((d, n) => d.classList.toggle("active", n === current)); }
+        function start() { stop(); if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) timer = setInterval(() => show(current + 1), 5000); }
+        function stop() { if (timer) clearInterval(timer); timer = null; }
+        hero.addEventListener("mouseenter", stop); hero.addEventListener("mouseleave", start); hero.addEventListener("focusin", stop); hero.addEventListener("focusout", start);
+        show(0); start();
+    })();
 
     // ============================================================
     // 13. Menu Favorit: berjalan otomatis searah, berhenti saat disorot, bisa digeser
