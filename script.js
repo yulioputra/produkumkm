@@ -24,7 +24,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const LS_STOCKS = "umkm_stocks";
     const LS_ORDERS = "umkm_orders";
     const LS_LOGS = "umkm_stock_logs";
-    const ADMIN_USER = "admin";
+    const ADMIN_USER = "yulio";
+    const LS_MEMBERS = "umkm_members";
+    const LS_SESSION = "umkm_member_session";
     const ADMIN_PASS = "admin123";
     const LOCAL_TOKEN = "local-admin-session";
 
@@ -115,7 +117,8 @@ document.addEventListener("DOMContentLoaded", function () {
             id: "ORD-" + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 256).toString(16).toUpperCase().padStart(2, "0"),
             time: new Date().toISOString(),
             total: items.reduce((sum, i) => sum + i.price * i.qty, 0),
-            status: "Menunggu Konfirmasi WhatsApp"
+            status: "Menunggu Konfirmasi WhatsApp",
+            owner: body.owner ? String(body.owner) : null
         }, info, { items: items });
 
         items.forEach(it => {
@@ -168,6 +171,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (route === "/orders" && method === "GET") {
             const all = lsGet(LS_ORDERS, []);
             if (admin) return all;
+            if (session && query.get("owner") === session.username) return all.filter(o => o.owner === session.username);
             const ids = (query.get("ids") || "").split(",");
             return all.filter(o => ids.indexOf(o.id) !== -1);
         }
@@ -178,13 +182,41 @@ document.addEventListener("DOMContentLoaded", function () {
         throw httpError(404, "Endpoint tidak ditemukan");
     }
 
-    function getMyOrderIds() {
-        try { return JSON.parse(localStorage.getItem(LS_MY_ORDERS)) || []; } catch (e) { return []; }
+    // Pesanan non-member: hanya diingat 24 jam
+    function guestOrders() {
+        const now = Date.now();
+        const fresh = lsGet(LS_MY_ORDERS, [])
+            .map(e => typeof e === "string" ? { id: e, t: now } : e)
+            .filter(e => now - e.t < 24 * 3600 * 1000);
+        lsSet(LS_MY_ORDERS, fresh);
+        return fresh;
     }
+    function getMyOrderIds() { return guestOrders().map(e => e.id); }
     function rememberOrder(id) {
+        const a = guestOrders();
+        a.unshift({ id: id, t: Date.now() });
+        lsSet(LS_MY_ORDERS, a.slice(0, 50));
+    }
+
+    // Member
+    let session = lsGet(LS_SESSION, null);   // { username, name }
+    function isMember() { return !!session; }
+    async function hashPw(s) {
+        try {
+            const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("umkm:" + s));
+            return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, "0")).join("");
+        } catch (e) { return "b64:" + btoa(unescape(encodeURIComponent(s))); }
+    }
+    function claimGuestOrders(u) {
         const ids = getMyOrderIds();
-        ids.unshift(id);
-        try { localStorage.setItem(LS_MY_ORDERS, JSON.stringify(ids.slice(0, 50))); } catch (e) { /* abaikan */ }
+        if (!ids.length) return;
+        const all = lsGet(LS_ORDERS, []);
+        all.forEach(o => { if (ids.indexOf(o.id) !== -1 && !o.owner) o.owner = u; });
+        lsSet(LS_ORDERS, all);
+        lsSet(LS_MY_ORDERS, []);
+    }
+    function guestWarnHtml() {
+        return `<div class="guest-warn"><i class="fa-solid fa-triangle-exclamation"></i> Anda belum login sebagai member. Riwayat pesanan akan terhapus otomatis dalam 24 jam. <a href="#" class="warn-login">Login / Daftar</a> agar tersimpan permanen.</div>`;
     }
 
     // ============================================================
@@ -255,6 +287,12 @@ document.addEventListener("DOMContentLoaded", function () {
         customDialogOverlay.classList.add("active");
     }
     function closeDialog() { customDialogOverlay.classList.remove("active"); }
+    customDialogOverlay.addEventListener("click", e => {
+        if (e.target === customDialogOverlay && customDialogBox.classList.contains("detail")) closeDialog();
+    });
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape" && customDialogBox.classList.contains("detail")) closeDialog();
+    });
     function bindClose(id) {
         const el = document.getElementById(id);
         if (el) el.onclick = closeDialog;
@@ -278,7 +316,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ============================================================
     function updateAdminUIState() {
         const navText = document.getElementById("adminNavText");
-        if (navText) navText.textContent = isAdmin() ? "Admin (Logout)" : "Login Admin";
+        if (navText) navText.textContent = isAdmin() ? "Admin (Logout)" : (isMember() ? "Hai, " + session.name.split(" ")[0] + " (Logout)" : "Login / Daftar");
         const stockLogItem = document.getElementById("stockLogNavItem");
         if (stockLogItem) stockLogItem.style.display = isAdmin() ? "" : "none";
         renderStocks();
@@ -359,59 +397,77 @@ document.addEventListener("DOMContentLoaded", function () {
     // ============================================================
     const adminLoginNavBtn = document.getElementById("adminLoginNavBtn");
     if (adminLoginNavBtn) {
-        adminLoginNavBtn.addEventListener("click", async function (e) {
+        adminLoginNavBtn.addEventListener("click", function (e) {
             e.preventDefault();
-            if (isAdmin()) {
-                try { await api("/logout", { method: "POST" }); } catch (err) { /* abaikan */ }
-                forceLogout();
-                return;
-            }
-
-            openDialog(`
-                <div class="custom-dialog-icon"><i class="fa-solid fa-user-shield"></i></div>
-                <h3>Login Admin</h3>
-                <p>Masukkan username dan password admin untuk mengedit stok.</p>
-                <input type="text" id="adminUser" placeholder="Username" style="margin-bottom:8px;">
-                <div style="position:relative; margin-bottom:1.2rem;">
-                    <input type="password" id="adminPass" placeholder="Password" style="margin-bottom:0; padding-right:40px;">
-                    <button type="button" id="togglePassBtn" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--dark-muted); cursor:pointer; font-size:1rem;" title="Tampilkan/Sembunyikan Password">
-                        <i class="fa-solid fa-eye"></i>
-                    </button>
-                </div>
-                <div class="custom-dialog-buttons">
-                    <button class="custom-dialog-btn btn-dialog-cancel" id="dialogCancelBtn">Batal</button>
-                    <button class="custom-dialog-btn btn-dialog-confirm" id="dialogLoginBtn">Login</button>
-                </div>`);
-
-            const passInput = document.getElementById("adminPass");
-            const togglePassBtn = document.getElementById("togglePassBtn");
-            togglePassBtn.onclick = () => {
-                const show = passInput.type === "password";
-                passInput.type = show ? "text" : "password";
-                togglePassBtn.innerHTML = show ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
-            };
-            bindClose("dialogCancelBtn");
-            document.getElementById("dialogLoginBtn").onclick = async () => {
-                const u = document.getElementById("adminUser").value.trim();
-                const p = document.getElementById("adminPass").value.trim();
-                try {
-                    const data = await api("/login", { method: "POST", body: JSON.stringify({ username: u, password: p }) });
-                    adminToken = data.token;
-                    sessionStorage.setItem(SS_ADMIN_TOKEN, adminToken);
-                    closeDialog();
-                    updateAdminUIState();
-                } catch (err) {
-                    let errEl = customDialogBox.querySelector(".login-err");
-                    if (!errEl) {
-                        errEl = document.createElement("p");
-                        errEl.className = "login-err";
-                        errEl.style.cssText = "color:var(--accent);font-size:0.8rem;font-weight:700;";
-                        customDialogBox.insertBefore(errEl, customDialogBox.querySelector(".custom-dialog-buttons"));
-                    }
-                    errEl.textContent = err.message;
-                }
-            };
+            if (isAdmin()) { forceLogout(); return; }
+            if (isMember()) { session = null; localStorage.removeItem(LS_SESSION); updateAdminUIState(); return; }
+            showAuthDialog("login");
         });
+    }
+    document.addEventListener("click", function (e) {
+        if (e.target.closest(".warn-login")) { e.preventDefault(); showAuthDialog("login"); }
+    });
+
+    function startMember(u, name) {
+        session = { username: u, name: name };
+        lsSet(LS_SESSION, session);
+        claimGuestOrders(u);
+        closeDialog();
+        updateAdminUIState();
+    }
+
+    function showAuthDialog(tab) {
+        const reg = tab === "register";
+        openDialog(`
+            <h3><i class="fa-solid fa-user-lock"></i> ${reg ? "Daftar Member" : "Login"}</h3>
+            <div class="auth-tabs">
+                <button class="chip ${reg ? "" : "active"}" id="tabLogin">Login</button>
+                <button class="chip ${reg ? "active" : ""}" id="tabReg">Daftar</button>
+            </div>
+            <p style="font-size:0.82rem;margin-bottom:0.9rem;">${reg ? "Buat akun member agar riwayat pesanan tersimpan permanen." : "Masuk sebagai member atau admin."}</p>
+            ${reg ? `<label class="form-label" for="auName">Nama</label><input type="text" id="auName" maxlength="40" autocomplete="name">` : ""}
+            <label class="form-label" for="auUser">Username</label>
+            <input type="text" id="auUser" maxlength="20" autocomplete="username" autocapitalize="none">
+            <label class="form-label" for="auPass">Password</label>
+            <input type="password" id="auPass" autocomplete="${reg ? "new-password" : "current-password"}">
+            <p class="form-error" id="auErr" style="display:none;"></p>
+            <div class="custom-dialog-buttons">
+                <button class="custom-dialog-btn btn-dialog-cancel" id="dialogCancelBtn">Batal</button>
+                <button class="custom-dialog-btn btn-dialog-confirm" id="auSubmit">${reg ? "Daftar" : "Login"}</button>
+            </div>`, "checkout");
+        bindClose("dialogCancelBtn");
+        document.getElementById("tabLogin").onclick = () => showAuthDialog("login");
+        document.getElementById("tabReg").onclick = () => showAuthDialog("register");
+
+        const fail = m => { const el = document.getElementById("auErr"); el.textContent = m; el.style.display = "block"; };
+        const submit = async () => {
+            const u = document.getElementById("auUser").value.trim().toLowerCase();
+            const p = document.getElementById("auPass").value;
+            if (!u || !p) return fail("Username dan password wajib diisi.");
+            const members = lsGet(LS_MEMBERS, {});
+            if (reg) {
+                const name = document.getElementById("auName").value.trim();
+                if (name.length < 2) return fail("Nama minimal 2 karakter.");
+                if (!/^[a-z0-9_.]{3,20}$/.test(u)) return fail("Username 3-20 karakter: huruf, angka, titik, atau garis bawah.");
+                if (p.length < 6) return fail("Password minimal 6 karakter.");
+                if (u === ADMIN_USER || u === "admin" || members[u]) return fail("Username sudah dipakai.");
+                members[u] = { name: name, hash: await hashPw(p) };
+                lsSet(LS_MEMBERS, members);
+                startMember(u, name);
+            } else if (u === ADMIN_USER && p === ADMIN_PASS) {
+                adminToken = LOCAL_TOKEN;
+                sessionStorage.setItem(SS_ADMIN_TOKEN, adminToken);
+                closeDialog();
+                updateAdminUIState();
+            } else if (members[u] && members[u].hash === await hashPw(p)) {
+                startMember(u, members[u].name);
+            } else {
+                fail("Username atau password salah!");
+            }
+        };
+        document.getElementById("auSubmit").onclick = submit;
+        ["auUser", "auPass"].forEach(id => { document.getElementById(id).onkeydown = ev => { if (ev.key === "Enter") submit(); }; });
+        document.getElementById(reg ? "auName" : "auUser").focus();
     }
 
     // ============================================================
@@ -448,8 +504,9 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    function selectedItems() { return cart.filter(i => i.checked); }
     function cartTotal() {
-        return cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+        return selectedItems().reduce((sum, i) => sum + i.price * i.qty, 0);
     }
 
     document.addEventListener("click", function (e) {
@@ -483,6 +540,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <h3>Masukkan Jumlah</h3>
             <p>Berapa porsi / buah <strong>${escapeHtml(p.name)}</strong> yang ingin dibeli?<br><small style="color:var(--primary);">Stok tersedia: ${maxStock} (di keranjang: ${currentInCart})</small></p>
             <input type="number" id="promptQtyInput" value="1" min="1" max="${remainingStock}">
+            <p class="form-error" id="qtyErr" style="display:none;margin-top:-0.8rem;"></p>
             <div class="custom-dialog-buttons">
                 <button class="custom-dialog-btn btn-dialog-cancel" id="dialogCancelBtn">Batal</button>
                 <button class="custom-dialog-btn btn-dialog-confirm" id="dialogConfirmBtn">Masukan Keranjang</button>
@@ -492,26 +550,36 @@ document.addEventListener("DOMContentLoaded", function () {
         input.focus();
         input.select();
         bindClose("dialogCancelBtn");
-        document.getElementById("dialogConfirmBtn").onclick = () => {
-            let qty = parseInt(input.value) || 1;
-            if (qty > remainingStock) qty = remainingStock;
-            if (qty < 1) return;
+        const confirmBtn = document.getElementById("dialogConfirmBtn");
+        confirmBtn.onclick = () => {
+            const raw = input.value.trim();
+            const qty = Number(raw);
+            const errEl = document.getElementById("qtyErr");
+            const bad = m => { errEl.textContent = m; errEl.style.display = "block"; input.focus(); };
+            if (raw === "" || !Number.isInteger(qty) || qty < 1) return bad("Jumlah minimal 1. Tidak boleh 0 atau kosong.");
+            if (qty > remainingStock) return bad("Jumlah melebihi stok. Maksimal " + remainingStock + ".");
             addToCart(p, qty);
             closeDialog();
             toggleCart(true);
         };
+        input.onkeydown = ev => { if (ev.key === "Enter") confirmBtn.click(); };
     }
 
     function addToCart(p, qty) {
         const existing = cart.find(i => i.id === p.id);
         if (existing) existing.qty += qty;
-        else cart.push({ id: p.id, name: p.name, price: p.price, img: p.img, qty: qty });
+        else cart.push({ id: p.id, name: p.name, price: p.price, img: p.img, qty: qty, checked: true });
         updateCartUI();
     }
 
     function updateCartUI() {
         syncCartWithStock();
         cartCounter.textContent = cart.reduce((sum, i) => sum + i.qty, 0);
+        const ae = document.activeElement;
+        if (ae && ae.classList && ae.classList.contains("cart-qty-input") && cart.length) {   // jangan timpa input yang sedang diketik
+            cartTotalPrice.textContent = rupiah(cartTotal());
+            return;
+        }
 
         if (cart.length === 0) {
             cartDrawerBody.innerHTML = `
@@ -524,15 +592,19 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        cartDrawerBody.innerHTML = cart.map(item => `
-            <div class="cart-item">
+        const chosen = selectedItems().length;
+        cartDrawerBody.innerHTML = `
+            <label class="cart-selectall"><input type="checkbox" class="cart-check" id="cartCheckAll" ${chosen === cart.length ? "checked" : ""}> Pilih semua (${chosen}/${cart.length} dipilih)</label>` +
+            cart.map(item => `
+            <div class="cart-item ${item.checked ? "" : "unchecked"}">
+                <input type="checkbox" class="cart-check item-check" data-id="${item.id}" ${item.checked ? "checked" : ""} aria-label="Pilih ${escapeHtml(item.name)}">
                 <img src="${item.img}" alt="${escapeHtml(item.name)}" class="cart-item-img" onerror="this.src='https://placehold.co/55x55/fed7aa/9a3412?text=Foto'">
                 <div class="cart-item-info">
                     <div class="cart-item-title">${escapeHtml(item.name)}</div>
                     <div class="cart-item-price">${rupiah(item.price)}</div>
                     <div class="cart-item-controls">
-                        <button class="qty-btn decrease-qty" data-id="${item.id}">-</button>
-                        <span class="cart-item-qty">${item.qty}</span>
+                        <button class="qty-btn decrease-qty" data-id="${item.id}" ${item.qty <= 1 ? "disabled" : ""}>-</button>
+                        <input type="number" class="cart-qty-input" data-id="${item.id}" value="${item.qty}" min="1" max="${getStock(item.id)}" aria-label="Jumlah">
                         <button class="qty-btn increase-qty" data-id="${item.id}">+</button>
                     </div>
                 </div>
@@ -540,26 +612,38 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>`).join("");
 
         cartTotalPrice.textContent = rupiah(cartTotal());
-        checkoutWhatsappBtn.classList.remove("disabled");
+        checkoutWhatsappBtn.classList.toggle("disabled", chosen === 0);
     }
 
     cartDrawerBody.addEventListener("click", function (e) {
-        const inc = e.target.closest(".increase-qty");
-        const dec = e.target.closest(".decrease-qty");
-        const rem = e.target.closest(".remove-item");
-        const btn = inc || dec || rem;
+        const btn = e.target.closest(".increase-qty, .decrease-qty, .remove-item");
         if (!btn) return;
         const id = btn.dataset.id;
         const item = cart.find(i => i.id === id);
         if (!item) return;
+        if (btn.classList.contains("increase-qty")) { if (item.qty < getStock(id)) item.qty += 1; }
+        else if (btn.classList.contains("decrease-qty")) { if (item.qty > 1) item.qty -= 1; }
+        else cart = cart.filter(i => i.id !== id);
+        updateCartUI();
+    });
 
-        if (inc) {
-            if (item.qty < getStock(id)) item.qty += 1;
-        } else if (dec) {
-            item.qty -= 1;
-            if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
-        } else {
-            cart = cart.filter(i => i.id !== id);
+    cartDrawerBody.addEventListener("change", function (e) {
+        const t = e.target;
+        if (t.id === "cartCheckAll") { cart.forEach(i => { i.checked = t.checked; }); updateCartUI(); return; }
+        const item = cart.find(i => i.id === t.dataset.id);
+        if (!item) return;
+        if (t.classList.contains("item-check")) {
+            item.checked = t.checked;
+        } else if (t.classList.contains("cart-qty-input")) {
+            const raw = t.value.trim(), n = Number(raw), s = getStock(item.id);
+            if (raw === "" || !Number.isInteger(n) || n < 1) {
+                infoDialog("fa-solid fa-triangle-exclamation", "var(--accent)", "Jumlah Tidak Valid", "Jumlah minimal 1, tidak boleh 0 atau kosong. Pakai ikon tempat sampah untuk menghapus produk.");
+            } else if (n > s) {
+                item.qty = s;
+                infoDialog("fa-solid fa-triangle-exclamation", "var(--accent)", "Stok Terbatas", `Stok ${item.name} hanya ${s}.`);
+            } else {
+                item.qty = n;
+            }
         }
         updateCartUI();
     });
@@ -569,6 +653,10 @@ document.addEventListener("DOMContentLoaded", function () {
     // ============================================================
     checkoutWhatsappBtn.addEventListener("click", function () {
         if (cart.length === 0) return;
+        if (selectedItems().length === 0) {
+            infoDialog("fa-solid fa-circle-info", "var(--primary)", "Belum Ada Produk Dipilih", "Centang minimal satu produk di keranjang sebelum checkout.");
+            return;
+        }
         showCheckoutForm();
     });
 
@@ -597,11 +685,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ---- Langkah 1: data pemesan + pilih metode pembayaran ----
     function showCheckoutForm(prefill) {
-        const d = Object.assign({}, loadProfile(), prefill || {});
-        const summary = cart.map(i => `<div><span>${escapeHtml(i.name)} &times; ${i.qty}</span><span>${rupiah(i.price * i.qty)}</span></div>`).join("");
+        const d = Object.assign({}, isMember() ? { name: session.name } : {}, loadProfile(), prefill || {});
+        const summary = selectedItems().map(i => `<div><span>${escapeHtml(i.name)} &times; ${i.qty}</span><span>${rupiah(i.price * i.qty)}</span></div>`).join("");
 
         openDialog(`
             <h3><i class="fa-solid fa-bag-shopping"></i> Data Pemesan & Pembayaran</h3>
+            ${isMember() ? "" : guestWarnHtml()}
             <div class="checkout-summary">${summary}<div class="sum-total"><span>Total</span><span>${rupiah(cartTotal())}</span></div></div>
 
             <label class="form-label" for="coName">Nama Pemesan *</label>
@@ -747,9 +836,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function processCheckout(info) {
         syncCartWithStock();
-        if (cart.length === 0) {
+        const chosen = selectedItems();
+        if (chosen.length === 0) {
             updateCartUI();
-            infoDialog("fa-solid fa-circle-xmark", "var(--accent)", "Keranjang Kosong", "Stok produk di keranjang sudah habis atau keranjang kosong.");
+            infoDialog("fa-solid fa-circle-xmark", "var(--accent)", "Keranjang Kosong", "Tidak ada produk terpilih yang tersedia (stok habis atau belum dicentang).");
             return null;
         }
         try {
@@ -762,11 +852,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     note: info.note,
                     paymentMethod: info.method,
                     paymentRef: info.paymentRef || "",
-                    items: cart.map(i => ({ id: i.id, qty: i.qty }))
+                    owner: session ? session.username : "",
+                    items: chosen.map(i => ({ id: i.id, qty: i.qty }))
                 })
             });
-            rememberOrder(order.id);
-            cart = [];                 // keranjang kembali ke 0 setelah pesanan dibuat
+            if (!session) rememberOrder(order.id);
+            cart = cart.filter(i => !i.checked);   // hanya produk yang dicentang yang keluar dari keranjang
             checkoutData = null;
             await refreshStocks();     // stok terbaru dari server
             updateCartUI();
@@ -787,6 +878,8 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             if (isAdmin()) {
                 list = await api("/orders");
+            } else if (isMember()) {
+                list = await api("/orders?owner=" + encodeURIComponent(session.username));
             } else {
                 const ids = getMyOrderIds();
                 list = ids.length ? await api("/orders?ids=" + encodeURIComponent(ids.join(","))) : [];
@@ -819,6 +912,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         openDialog(`
             <h3><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Pesanan${isAdmin() ? " (Semua)" : ""}</h3>
+            ${!isAdmin() && !isMember() ? guestWarnHtml() : ""}
             <div class="history-scroll">${body}</div>
             <div class="custom-dialog-buttons">
                 <button class="custom-dialog-btn btn-dialog-confirm" id="dialogOkBtn">Tutup</button>
@@ -871,8 +965,153 @@ document.addEventListener("DOMContentLoaded", function () {
     if (stockLogNavBtn) stockLogNavBtn.addEventListener("click", e => { e.preventDefault(); showStockLog(); });
 
     // ============================================================
+    // 11. Pencarian & Kategori
+    // ============================================================
+    let activeCat = "all";
+    const searchInput = document.getElementById("menuSearch");
+    function applyFilter() {
+        const q = searchInput.value.trim().toLowerCase();
+        let shown = 0;
+        document.querySelectorAll(".data-table tbody tr").forEach(row => {
+            const cat = row.querySelector(".category-tag").textContent.trim();
+            const hay = (row.dataset.name + " " + row.querySelector(".product-name-cell small").textContent).toLowerCase();
+            const ok = (activeCat === "all" || cat === activeCat) && (!q || hay.indexOf(q) !== -1);
+            row.style.display = ok ? "" : "none";
+            if (ok) shown++;
+        });
+        document.getElementById("noResult").style.display = shown ? "none" : "block";
+    }
+    if (searchInput) {
+        searchInput.addEventListener("input", applyFilter);
+        document.getElementById("catChips").addEventListener("click", e => {
+            const chip = e.target.closest(".chip");
+            if (!chip) return;
+            activeCat = chip.dataset.cat;
+            document.querySelectorAll("#catChips .chip").forEach(x => x.classList.toggle("active", x === chip));
+            applyFilter();
+        });
+    }
+
+    // ============================================================
+    // 12. Modal Detail (komposisi bahan, tanpa lokasi/asal daerah)
+    // ============================================================
+    const DETAIL = {
+        "KLN-001": ["Tepung terigu", "Telur ayam", "Susu segar", "Daging sapi asap", "Keju", "Mayones", "Bawang bombay", "Lada hitam", "Tepung panir"],
+        "KLN-002": ["Biji kopi robusta", "Kapulaga", "Kayu manis", "Gula aren", "Air matang"],
+        "KLN-003": ["Singkong segar", "Cabai merah", "Bawang putih", "Bawang merah", "Gula", "Garam", "Minyak nabati"],
+        "KLN-004": ["Ikan tenggiri", "Tepung tapioka", "Telur ayam", "Bawang putih", "Garam", "Gula aren", "Cabai rawit", "Cuka"],
+        "KLN-005": ["Tepung beras", "Daun suji", "Santan kelapa", "Gula aren", "Daging durian", "Nangka", "Es batu"],
+        "KLN-006": ["Kentang", "Tepung terigu", "Santan kelapa", "Telur ayam", "Gula pasir", "Kismis", "Keju parut"]
+    };
+
+    function openDetail(id) {
+        const p = products[id];
+        if (!p) return;
+        const row = document.querySelector(`.data-table tr[data-id="${id}"]`);
+        const tag = row ? row.querySelector(".category-tag") : null;
+        const sub = row ? row.querySelector(".product-name-cell small").textContent : "";
+        const ing = (DETAIL[id] || []).map(x => `<li>${escapeHtml(x)}</li>`).join("");
+        const stock = getStock(id);
+        openDialog(`
+            <button class="detail-close" id="detailX" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
+            <img class="detail-img" src="${p.img}" alt="${escapeHtml(p.name)}" onerror="this.style.visibility='hidden'">
+            <div class="detail-body">
+                ${tag ? `<span class="${tag.className}">${escapeHtml(tag.textContent)}</span>` : ""}
+                <h3>${escapeHtml(p.name)}</h3>
+                <p class="detail-sub">${escapeHtml(sub)}</p>
+                <div class="detail-price">${rupiah(p.price)} <small>&bull; Stok: ${stock} ${escapeHtml(p.unit)}</small></div>
+                <h4>Komposisi Bahan Alami</h4>
+                <ul class="ing-list">${ing}</ul>
+                <div class="custom-dialog-buttons">
+                    <button class="custom-dialog-btn btn-dialog-cancel" id="detailCloseBtn">Keluar Pratinjau</button>
+                    <button class="custom-dialog-btn btn-dialog-confirm" id="detailAddBtn" ${stock <= 0 ? "disabled" : ""}>${stock <= 0 ? "Stok Habis" : "Tambah ke Keranjang"}</button>
+                </div>
+            </div>`, "detail");
+        bindClose("detailX");
+        bindClose("detailCloseBtn");
+        document.getElementById("detailAddBtn").onclick = () => { if (getStock(id) > 0) showQuantityPrompt(products[id]); };
+    }
+
+    let favDragged = false;
+    // Setelah menggeser, klik yang menyusul diabaikan (fase capture)
+    document.addEventListener("click", e => { if (favDragged) { e.stopPropagation(); e.preventDefault(); } }, true);
+    document.addEventListener("click", e => {
+        const rowHit = e.target.closest(".data-table .img-box-table, .data-table .product-name-cell");
+        if (rowHit) { openDetail(rowHit.closest("tr").dataset.id); return; }
+        const card = e.target.closest(".product-card[data-detail]");
+        if (card && e.target.closest(".card-image, .card-title, .card-desc")) openDetail(card.dataset.detail);
+    });
+
+    // ============================================================
+    // 13. Menu Favorit: berjalan otomatis searah, berhenti saat disorot, bisa digeser
+    // ============================================================
+    (function initFavorites() {
+        const vp = document.getElementById("favViewport");
+        const track = document.getElementById("favTrack");
+        if (!vp || !track) return;
+        const n = track.children.length;
+        for (let c = 0; c < 2; c++) {          // 3 salinan agar putaran mulus
+            for (let i = 0; i < n; i++) {
+                const k = track.children[i].cloneNode(true);
+                k.setAttribute("aria-hidden", "true");
+                track.appendChild(k);
+            }
+        }
+        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const SPEED = 40;                       // piksel per detik
+        const period = () => track.children[n].offsetLeft - track.children[0].offsetLeft;
+        let paused = false, down = false, sx = 0, sl = 0, pos = period(), last = 0, resumeTimer = 0;
+        vp.scrollLeft = pos;
+
+        function tick(t) {
+            const dt = Math.min(t - (last || t), 50) / 1000;
+            last = t;
+            if (!paused && !down && !reduce) {
+                const w = period();
+                pos += SPEED * dt;
+                if (pos >= 2 * w) pos -= w;
+                vp.scrollLeft = pos;
+            }
+            requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+
+        vp.addEventListener("scroll", () => {   // jaga posisi tetap di salinan tengah saat digeser manual
+            if (!paused && !down) return;
+            const w = period(), s = vp.scrollLeft;
+            if (s < w) { vp.scrollLeft = s + w; sl += w; }
+            else if (s >= 2 * w) { vp.scrollLeft = s - w; sl -= w; }
+        });
+
+        function resume() { pos = vp.scrollLeft; paused = false; }
+        vp.addEventListener("mouseenter", () => { paused = true; });
+        vp.addEventListener("mouseleave", () => { if (!down) resume(); });
+        vp.addEventListener("touchstart", () => { clearTimeout(resumeTimer); paused = true; }, { passive: true });
+        vp.addEventListener("touchend", () => { clearTimeout(resumeTimer); resumeTimer = setTimeout(resume, 1500); }, { passive: true });
+
+        vp.addEventListener("pointerdown", e => {
+            if (e.pointerType !== "mouse" || e.button !== 0) return;
+            down = true; sx = e.clientX; sl = vp.scrollLeft; favDragged = false;
+        });
+        window.addEventListener("pointermove", e => {
+            if (!down) return;
+            const dx = e.clientX - sx;
+            if (Math.abs(dx) > 5) { favDragged = true; vp.classList.add("dragging"); }
+            vp.scrollLeft = sl - dx;
+        });
+        window.addEventListener("pointerup", () => {
+            if (!down) return;
+            down = false;
+            vp.classList.remove("dragging");
+            pos = vp.scrollLeft;
+            setTimeout(() => { favDragged = false; }, 0);
+        });
+    })();
+
+    // ============================================================
     // 10. Inisialisasi
     // ============================================================
+    getMyOrderIds();                     // bersihkan riwayat tamu yang lewat 24 jam
     updateAdminUIState();
     updateCartUI();
     refreshStocks();
