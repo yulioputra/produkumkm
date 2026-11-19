@@ -28,7 +28,7 @@ Login admin menggunakan akun pengelola yang telah dikonfigurasi. Member dapat me
 Data (stok, pesanan, riwayat) disimpan di **browser** lewat `localStorage`, tanpa server. Artinya:
 * Data hanya terlihat di browser dan perangkat yang sama.
 * Untuk mengembalikan data awal: tekan `F12` → tab *Application* → *Local Storage* → klik kanan → *Clear*, lalu refresh.
-* Password admin ada di `script.js`, jadi cocok untuk demo/tugas, bukan toko sungguhan.
+* Form login tidak menampilkan username atau password bawaan. Namun, karena versi ini sepenuhnya berjalan di browser, pemeriksaan admin tetap dapat dibaca dari source JavaScript; ini hanya cocok untuk demo/tugas, bukan toko sungguhan. Untuk keamanan nyata, autentikasi admin harus dipindahkan ke backend.
 
 ## 📁 Struktur Berkas
 ```text
